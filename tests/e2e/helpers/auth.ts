@@ -166,24 +166,100 @@ export async function mockUserLogin(page: Page) {
           };
         },
         signOut: () => Promise.resolve({ error: null }),
-        signInWithOAuth: () => Promise.resolve({ error: null })
+        signInWithOAuth: () => Promise.resolve({ error: null }),
+        signInWithGoogle: () => Promise.resolve({ error: null }) // 後方互換性
       },
-      from: () => ({
-        select: () => ({
-          eq: () => ({
-            single: () => Promise.resolve({ data: null, error: null }),
+      from: (table: string) => {
+        if (table === 'boards') {
+          return {
+            select: () => ({
+              eq: () => ({
+                single: () => Promise.resolve({ 
+                  data: {
+                    id: 'test-board-123',
+                    title: 'テストボード',
+                    user_id: 'test-user-123',
+                    created_at: '2023-01-01T00:00:00Z',
+                    updated_at: '2023-01-01T00:00:00Z'
+                  }, 
+                  error: null 
+                })
+              })
+            }),
+            insert: () => Promise.resolve({ 
+              data: {
+                id: 'test-board-123',
+                title: 'テストボード',
+                user_id: 'test-user-123'
+              }, 
+              error: null 
+            }),
+            update: () => Promise.resolve({ data: null, error: null }),
+            delete: () => Promise.resolve({ data: null, error: null })
+          }
+        }
+        if (table === 'lists') {
+          return {
+            select: () => ({
+              eq: () => ({
+                order: () => Promise.resolve({ 
+                  data: [
+                    {
+                      id: 'list-1',
+                      title: 'To Do',
+                      position: 0,
+                      board_id: 'test-board-123'
+                    }
+                  ], 
+                  error: null 
+                })
+              })
+            }),
+            insert: () => Promise.resolve({ data: null, error: null }),
+            update: () => Promise.resolve({ data: null, error: null }),
+            delete: () => Promise.resolve({ data: null, error: null })
+          }
+        }
+        if (table === 'cards') {
+          return {
+            select: () => ({
+              in: () => ({
+                order: () => Promise.resolve({ 
+                  data: [
+                    {
+                      id: 'card-1',
+                      title: 'テストカード',
+                      description: 'テスト用のカードです',
+                      position: 0,
+                      list_id: 'list-1'
+                    }
+                  ], 
+                  error: null 
+                })
+              })
+            }),
+            insert: () => Promise.resolve({ data: null, error: null }),
+            update: () => Promise.resolve({ data: null, error: null }),
+            delete: () => Promise.resolve({ data: null, error: null })
+          }
+        }
+        return {
+          select: () => ({
+            eq: () => ({
+              single: () => Promise.resolve({ data: null, error: null }),
+              order: () => Promise.resolve({ data: [], error: null })
+            }),
             order: () => Promise.resolve({ data: [], error: null })
           }),
-          order: () => Promise.resolve({ data: [], error: null })
-        }),
-        insert: () => Promise.resolve({ data: null, error: null }),
-        update: () => Promise.resolve({ data: null, error: null }),
-        delete: () => Promise.resolve({ data: null, error: null })
-      })
+          insert: () => Promise.resolve({ data: null, error: null }),
+          update: () => Promise.resolve({ data: null, error: null }),
+          delete: () => Promise.resolve({ data: null, error: null })
+        }
+      }
     };
     
-    // グローバルにSupabaseモックを設定
-    (window as any).__supabaseMock = mockSupabase;
+    // グローバルにデータベースモックを設定
+    (window as any).__databaseMock = mockSupabase;
     
     // モックボードデータを設定
     (window as any).__mockBoardData = {
@@ -215,7 +291,7 @@ export async function clearAuth(page: Page) {
   await page.evaluate(() => {
     localStorage.clear();
     sessionStorage.clear();
-    delete (window as any).__supabaseMock;
+    delete (window as any).__databaseMock;
     delete (window as any).__mockBoardData;
   });
 }
