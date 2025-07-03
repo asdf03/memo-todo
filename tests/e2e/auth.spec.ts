@@ -6,15 +6,15 @@ test.describe('認証フロー', () => {
     
     // ログインページの要素をチェック
     await expect(page.locator('h1')).toContainText('Memo TODO');
-    await expect(page.locator('text=Googleでログイン')).toBeVisible();
+    await expect(page.locator('button.oauth-login-btn')).toBeVisible();
     await expect(page.locator('text=タスクを整理して、効率的に管理しましょう')).toBeVisible();
   });
 
-  test('Googleログインボタンが機能する', async ({ page }) => {
+  test('ログインボタンが機能する', async ({ page }) => {
     await page.goto('/');
     
-    // Googleログインボタンをクリック
-    const loginButton = page.locator('text=Googleでログイン');
+    // ログインボタンをクリック
+    const loginButton = page.locator('button.oauth-login-btn');
     await expect(loginButton).toBeVisible();
     
     // ボタンクリック後、Supabaseの認証ページへのリダイレクトをチェック

@@ -3,7 +3,7 @@ import { Board, List, Card, DBCard } from '../types'
 import { rateLimiter, RateLimitError } from './rateLimiter'
 import { InputValidator, ValidationError } from './validation'
 import { ResourceLimiter, ResourceLimitError } from './resourceLimiter'
-import { securityLogger, logRateLimitError, logValidationError, logResourceLimitError } from './logger'
+import { logRateLimitError, logValidationError } from './logger'
 
 export class BoardAPI {
   // ユーザーのボードを取得

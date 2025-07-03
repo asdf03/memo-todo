@@ -90,17 +90,14 @@ class SecurityLogger {
     }
   }
 
-  private async sendToExternalService(entry: LogEntry): Promise<void> {
-    // 本番環境では実際のログサービス（Sentry、LogRocket等）に送信
+  private async sendToExternalService(_entry: LogEntry): Promise<void> {
+    // 本番環境では実際のログサービスに送信
     // 現在はコンソールログのみ
     if (process.env.NODE_ENV === 'production') {
       try {
-        // 例: Sentryへの送信
-        // Sentry.captureException(new Error(entry.message), {
-        //   level: entry.level >= LogLevel.CRITICAL ? 'fatal' : 'error',
-        //   user: { id: entry.userId },
-        //   extra: entry.metadata
-        // })
+        // 外部ログサービスへの送信処理をここに実装
+        // 例: 任意のログサービスへの送信
+        // await logService.send(_entry)
       } catch (error) {
         console.error('Failed to send log to external service:', error)
       }

@@ -1,18 +1,18 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
-const supabaseAnonKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY
+const databaseUrl = (import.meta as any).env.VITE_SUPABASE_URL
+const databaseAnonKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
+if (!databaseUrl || !databaseAnonKey) {
+  throw new Error('Missing database environment variables')
 }
 
 // テスト環境でモックが利用可能な場合はそれを使用
-const createSupabaseClient = () => {
-  if (typeof window !== 'undefined' && (window as any).__supabaseMock) {
-    return (window as any).__supabaseMock
+const createDatabaseClient = () => {
+  if (typeof window !== 'undefined' && (window as any).__databaseMock) {
+    return (window as any).__databaseMock
   }
-  return createClient(supabaseUrl, supabaseAnonKey)
+  return createClient(databaseUrl, databaseAnonKey)
 }
 
-export const supabase = createSupabaseClient()
+export const supabase = createDatabaseClient()

@@ -59,8 +59,8 @@ export class ResourceLimiter {
           await supabase
             .from('lists')
             .select('id')
-            .in('board_id', boards?.map(b => b.id) || [])
-            .then(res => res.data?.map(l => l.id) || [])
+            .in('board_id', boards?.map((b: any) => b.id) || [])
+            .then((res: any) => res.data?.map((l: any) => l.id) || [])
         )
 
       if (cardError) throw cardError
@@ -68,7 +68,7 @@ export class ResourceLimiter {
       const totalCardCount = cards?.length || 0
 
       // ストレージ使用量を推定（タイトル + 説明のバイト数）
-      const estimatedStorage = cards?.reduce((total, card) => {
+      const estimatedStorage = cards?.reduce((total: any, card: any) => {
         const titleBytes = new TextEncoder().encode(card.title || '').length
         const descBytes = new TextEncoder().encode(card.description || '').length
         return total + titleBytes + descBytes
@@ -100,7 +100,7 @@ export class ResourceLimiter {
   /**
    * リスト作成前の制限チェック
    */
-  static async checkListCreationLimit(userId: string, boardId: string): Promise<void> {
+  static async checkListCreationLimit(_userId: string, boardId: string): Promise<void> {
     const limits = this.DEFAULT_LIMITS
 
     // 指定されたボードのリスト数を取得
@@ -154,7 +154,7 @@ export class ResourceLimiter {
    * データサイズの制限チェック
    */
   static checkDataSize(title: string, description?: string): void {
-    const limits = this.DEFAULT_LIMITS
+    // データサイズチェック
     
     const titleBytes = new TextEncoder().encode(title).length
     const descBytes = description ? new TextEncoder().encode(description).length : 0
