@@ -1,0 +1,35 @@
+.board-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  letter-spacing: -0.025em;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.board-title:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #111827;
+}
+
+.board-title-input {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  letter-spacing: -0.025em;
+  background: white;
+  border: 2px solid #6366f1;
+  border-radius: 6px;
+  padding: 0.5rem;
+  outline: none;
+  min-width: 200px;
+  max-width: 400px;
+}
+
+.board-title-input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}

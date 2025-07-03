@@ -1,0 +1,150 @@
+.card-view {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 0.75rem;
+}
+
+.card-view[draggable="true"] {
+  cursor: grab;
+}
+
+.card-view[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.card-view.card-drag-over {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(9, 30, 66, 0.25);
+}
+
+.card-view:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-title {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  word-wrap: break-word;
+  font-weight: 500;
+  color: #1f2937;
+  line-height: 1.4;
+}
+
+.card-description {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+  color: #6b7280;
+}
+
+.delete-card-btn {
+  background: none;
+  border: none;
+  color: #bdc3c7;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0.125rem;
+  border-radius: 2px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+
+.card-view:hover .delete-card-btn {
+  opacity: 1;
+}
+
+.delete-card-btn:hover {
+  background-color: #f8f9fa;
+  color: #e74c3c;
+}
+
+.card-edit {
+  background: white;
+  border-radius: 4px;
+  padding: 0.75rem;
+  box-shadow: 0 1px 0 rgba(9, 30, 66, 0.25), 0 4px 8px rgba(9, 30, 66, 0.13);
+}
+
+.card-title-input {
+  width: 100%;
+  font-size: 0.875rem;
+  color: #172b4d;
+  border: 2px solid #0079bf;
+  border-radius: 4px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  outline: none;
+}
+
+.card-description-input {
+  width: 100%;
+  font-size: 0.75rem;
+  color: #172b4d;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.card-description-input:focus {
+  border-color: #0079bf;
+}
+
+.card-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.save-btn {
+  background-color: #0079bf;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.save-btn:hover {
+  background-color: #005a8b;
+}
+
+.cancel-btn {
+  background: none;
+  color: #6b778c;
+  border: none;
+  border-radius: 4px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background-color: #e4e6ea;
+  color: #172b4d;
+}
