@@ -1,5 +1,9 @@
 import { supabase } from './supabase'
 import { Board, List, Card, DBCard } from '../types'
+import { rateLimiter, RateLimitError } from './rateLimiter'
+import { InputValidator, ValidationError } from './validation'
+import { ResourceLimiter, ResourceLimitError } from './resourceLimiter'
+import { securityLogger, logRateLimitError, logValidationError, logResourceLimitError } from './logger'
 
 export class BoardAPI {
   // ユーザーのボードを取得
@@ -107,17 +111,48 @@ export class BoardAPI {
   // ボードを作成（DBにのみ作成、データは返さない）
   static async createBoard(userId: string, title: string = 'マイボード'): Promise<void> {
     try {
+      // Rate Limiting チェック
+      if (!rateLimiter.check(userId, 'createBoard')) {
+        const resetTime = rateLimiter.getResetTime(userId, 'createBoard')
+        const remaining = rateLimiter.getRemainingRequests(userId, 'createBoard')
+        logRateLimitError(userId, 'createBoard', remaining)
+        throw new RateLimitError(
+          'ボード作成の制限に達しました。しばらく待ってから再試行してください。',
+          0,
+          resetTime
+        )
+      }
+
+      // リソース制限チェック
+      await ResourceLimiter.checkBoardCreationLimit(userId)
+
+      // 入力値検証
+      const validation = InputValidator.validateBoardTitle(title)
+      if (!validation.isValid) {
+        logValidationError(userId, 'boardTitle', title)
+        throw new ValidationError(validation.error!)
+      }
+
+      // UUIDの検証
+      const userIdValidation = InputValidator.validateUUID(userId)
+      if (!userIdValidation.isValid) {
+        throw new ValidationError('無効なユーザーIDです')
+      }
+
       const { error: boardError } = await supabase
         .from('boards')
         .insert({
           user_id: userId,
-          title
+          title: validation.sanitized
         })
         .select()
         .single()
 
       if (boardError) throw boardError
     } catch (error) {
+      if (error instanceof RateLimitError || error instanceof ValidationError || error instanceof ResourceLimitError) {
+        throw error
+      }
       console.error('Error creating board:', error)
       throw error
     }
@@ -126,16 +161,30 @@ export class BoardAPI {
   // ボードのタイトルのみ更新
   static async updateBoardTitle(boardId: string, title: string): Promise<void> {
     try {
+      // 入力値検証
+      const titleValidation = InputValidator.validateBoardTitle(title)
+      if (!titleValidation.isValid) {
+        throw new ValidationError(titleValidation.error!)
+      }
+
+      const boardIdValidation = InputValidator.validateUUID(boardId)
+      if (!boardIdValidation.isValid) {
+        throw new ValidationError('無効なボードIDです')
+      }
+
       const { error } = await supabase
         .from('boards')
         .update({ 
-          title,
+          title: titleValidation.sanitized,
           updated_at: new Date().toISOString()
         })
         .eq('id', boardId)
 
       if (error) throw error
     } catch (error) {
+      if (error instanceof ValidationError) {
+        throw error
+      }
       console.error('Error updating board title:', error)
       throw error
     }
@@ -244,45 +293,141 @@ export class BoardAPI {
   }
 
   // リストを追加（DBにのみ作成）
-  static async addList(boardId: string, title: string, position: number): Promise<void> {
+  static async addList(boardId: string, title: string, position: number, userId?: string): Promise<void> {
     try {
+      // Rate Limiting チェック（userIdが提供されている場合）
+      if (userId && !rateLimiter.check(userId, 'addList')) {
+        const resetTime = rateLimiter.getResetTime(userId, 'addList')
+        throw new RateLimitError(
+          'リスト作成の制限に達しました。しばらく待ってから再試行してください。',
+          0,
+          resetTime
+        )
+      }
+
+      // リソース制限チェック（userIdが提供されている場合）
+      if (userId) {
+        await ResourceLimiter.checkListCreationLimit(userId, boardId)
+      }
+
+      // 入力値検証
+      const titleValidation = InputValidator.validateListTitle(title)
+      if (!titleValidation.isValid) {
+        throw new ValidationError(titleValidation.error!)
+      }
+
+      const boardIdValidation = InputValidator.validateUUID(boardId)
+      if (!boardIdValidation.isValid) {
+        throw new ValidationError('無効なボードIDです')
+      }
+
+      const positionValidation = InputValidator.validatePosition(position)
+      if (!positionValidation.isValid) {
+        throw new ValidationError(positionValidation.error!)
+      }
+
       const { error } = await supabase
         .from('lists')
         .insert({
           board_id: boardId,
-          title,
+          title: titleValidation.sanitized,
           position
         })
 
       if (error) throw error
     } catch (error) {
+      if (error instanceof RateLimitError || error instanceof ValidationError || error instanceof ResourceLimitError) {
+        throw error
+      }
       console.error('Error adding list:', error)
       throw error
     }
   }
 
   // カードを追加（DBにのみ作成）
-  static async addCard(listId: string, title: string, position: number, description?: string): Promise<void> {
+  static async addCard(listId: string, title: string, position: number, description?: string, userId?: string): Promise<void> {
     try {
+      // Rate Limiting チェック（userIdが提供されている場合）
+      if (userId && !rateLimiter.check(userId, 'addCard')) {
+        const resetTime = rateLimiter.getResetTime(userId, 'addCard')
+        throw new RateLimitError(
+          'カード作成の制限に達しました。しばらく待ってから再試行してください。',
+          0,
+          resetTime
+        )
+      }
+
+      // 入力値検証
+      const titleValidation = InputValidator.validateCardTitle(title)
+      if (!titleValidation.isValid) {
+        throw new ValidationError(titleValidation.error!)
+      }
+
+      const listIdValidation = InputValidator.validateUUID(listId)
+      if (!listIdValidation.isValid) {
+        throw new ValidationError('無効なリストIDです')
+      }
+
+      const positionValidation = InputValidator.validatePosition(position)
+      if (!positionValidation.isValid) {
+        throw new ValidationError(positionValidation.error!)
+      }
+
+      let sanitizedDescription: string | undefined
+      if (description) {
+        const descriptionValidation = InputValidator.validateCardDescription(description)
+        if (!descriptionValidation.isValid) {
+          throw new ValidationError(descriptionValidation.error!)
+        }
+        sanitizedDescription = descriptionValidation.sanitized
+      }
+
+      // データサイズチェック
+      ResourceLimiter.checkDataSize(titleValidation.sanitized!, sanitizedDescription)
+
+      // リソース制限チェック（userIdが提供されている場合）
+      if (userId) {
+        await ResourceLimiter.checkCardCreationLimit(userId, listId)
+      }
+
       const { error } = await supabase
         .from('cards')
         .insert({
           list_id: listId,
-          title,
-          description,
+          title: titleValidation.sanitized,
+          description: sanitizedDescription,
           position
         })
 
       if (error) throw error
     } catch (error) {
+      if (error instanceof RateLimitError || error instanceof ValidationError || error instanceof ResourceLimitError) {
+        throw error
+      }
       console.error('Error adding card:', error)
       throw error
     }
   }
 
   // リストを削除
-  static async deleteList(listId: string): Promise<void> {
+  static async deleteList(listId: string, userId?: string): Promise<void> {
     try {
+      // Rate Limiting チェック（userIdが提供されている場合）
+      if (userId && !rateLimiter.check(userId, 'deleteList')) {
+        const resetTime = rateLimiter.getResetTime(userId, 'deleteList')
+        throw new RateLimitError(
+          'リスト削除の制限に達しました。しばらく待ってから再試行してください。',
+          0,
+          resetTime
+        )
+      }
+
+      // 入力値検証
+      const listIdValidation = InputValidator.validateUUID(listId)
+      if (!listIdValidation.isValid) {
+        throw new ValidationError('無効なリストIDです')
+      }
+
       const { error } = await supabase
         .from('lists')
         .delete()
@@ -290,14 +435,33 @@ export class BoardAPI {
 
       if (error) throw error
     } catch (error) {
+      if (error instanceof RateLimitError || error instanceof ValidationError) {
+        throw error
+      }
       console.error('Error deleting list:', error)
       throw error
     }
   }
 
   // カードを削除
-  static async deleteCard(cardId: string): Promise<void> {
+  static async deleteCard(cardId: string, userId?: string): Promise<void> {
     try {
+      // Rate Limiting チェック（userIdが提供されている場合）
+      if (userId && !rateLimiter.check(userId, 'deleteCard')) {
+        const resetTime = rateLimiter.getResetTime(userId, 'deleteCard')
+        throw new RateLimitError(
+          'カード削除の制限に達しました。しばらく待ってから再試行してください。',
+          0,
+          resetTime
+        )
+      }
+
+      // 入力値検証
+      const cardIdValidation = InputValidator.validateUUID(cardId)
+      if (!cardIdValidation.isValid) {
+        throw new ValidationError('無効なカードIDです')
+      }
+
       const { error } = await supabase
         .from('cards')
         .delete()
@@ -305,6 +469,9 @@ export class BoardAPI {
 
       if (error) throw error
     } catch (error) {
+      if (error instanceof RateLimitError || error instanceof ValidationError) {
+        throw error
+      }
       console.error('Error deleting card:', error)
       throw error
     }
