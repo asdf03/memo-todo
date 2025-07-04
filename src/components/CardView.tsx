@@ -2,6 +2,9 @@ import React, { useState, useEffect, memo, useCallback } from 'react'
 import { Card } from '../types'
 import MobileCardActions from './MobileCardActions'
 import MobileOverlay from './MobileOverlay'
+import { useSwipeGesture } from '../hooks/useSwipeGesture'
+import { useBoardContext } from '../context/BoardContext'
+import { useBoardOperations } from '../hooks/useBoardOperations'
 import './CardView.css'
 
 interface CardViewProps {
@@ -31,6 +34,10 @@ const CardView: React.FC<CardViewProps> = memo(({
   const [showMobileActions, setShowMobileActions] = useState(false)
   const [titleInput, setTitleInput] = useState(card.title)
   const [descriptionInput, setDescriptionInput] = useState(card.description || '')
+  const [swipeOffset, setSwipeOffset] = useState(0)
+  
+  const { board } = useBoardContext()
+  const { moveCard } = useBoardOperations()
   
   // cardが変更されたらinputも更新
   useEffect(() => {
@@ -67,22 +74,71 @@ const CardView: React.FC<CardViewProps> = memo(({
     setShowMobileActions(true)
   }, [])
 
-  // 長押し検出
+  // スワイプでカードを移動
+  const handleSwipeCard = useCallback((direction: 'left' | 'right') => {
+    const currentListIndex = board.lists.findIndex(list => list.id === listId)
+    let targetListIndex: number
+    
+    if (direction === 'left') {
+      targetListIndex = currentListIndex - 1
+    } else {
+      targetListIndex = currentListIndex + 1
+    }
+    
+    if (targetListIndex >= 0 && targetListIndex < board.lists.length) {
+      const targetList = board.lists[targetListIndex]
+      moveCard(card, targetList.id)
+      
+      // スワイプアニメーション
+      setSwipeOffset(direction === 'left' ? -300 : 300)
+      setTimeout(() => setSwipeOffset(0), 300)
+    }
+  }, [board.lists, listId, card, moveCard])
+
+  // スワイプジェスチャーの設定
+  const swipeGesture = useSwipeGesture({
+    threshold: 80, // より大きな閾値でスワイプを検出
+    velocity: 0.5,
+    onSwipeLeft: () => handleSwipeCard('left'),
+    onSwipeRight: () => handleSwipeCard('right')
+  })
+
+  // 長押し検出（スワイプと併用）
   const [pressTimer, setPressTimer] = useState<NodeJS.Timeout | null>(null)
+  const [isSwiping, setIsSwiping] = useState(false)
   
-  const handleTouchStart = useCallback(() => {
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    setIsSwiping(false)
+    swipeGesture.onTouchStart(e)
+    
     const timer = setTimeout(() => {
-      handleLongPress()
+      if (!isSwiping) {
+        handleLongPress()
+      }
     }, 500) // 500ms長押し
     setPressTimer(timer)
-  }, [handleLongPress])
+  }, [handleLongPress, isSwiping, swipeGesture])
 
-  const handleTouchEnd = useCallback(() => {
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    setIsSwiping(true)
+    swipeGesture.onTouchMove(e)
+    
     if (pressTimer) {
       clearTimeout(pressTimer)
       setPressTimer(null)
     }
-  }, [pressTimer])
+  }, [pressTimer, swipeGesture])
+
+  const handleTouchEnd = useCallback(() => {
+    swipeGesture.onTouchEnd()
+    
+    if (pressTimer) {
+      clearTimeout(pressTimer)
+      setPressTimer(null)
+    }
+    
+    setTimeout(() => setIsSwiping(false), 100)
+  }, [pressTimer, swipeGesture])
 
   const handleDeleteClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
@@ -142,8 +198,13 @@ const CardView: React.FC<CardViewProps> = memo(({
         onDrop={handleDrop}
         onClick={handleCardClick}
         onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
+        style={{
+          transform: `translateX(${swipeOffset}px)`,
+          transition: swipeOffset === 0 ? 'transform 0.3s ease' : 'none'
+        }}
       >
         <div className="card-content">
           <h4 className="card-title">
