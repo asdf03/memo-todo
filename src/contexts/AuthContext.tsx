@@ -46,10 +46,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [])
 
   const signInWithOAuth = async () => {
+    // 環境に応じたリダイレクトURL設定
+    const getRedirectUrl = () => {
+      // 環境変数で設定されている場合はそれを使用
+      const customRedirectUrl = (import.meta as any).env.VITE_REDIRECT_URL
+      if (customRedirectUrl) {
+        return customRedirectUrl
+      }
+      
+      // 自動判別
+      if (typeof window !== 'undefined') {
+        return `${window.location.origin}/`
+      }
+      
+      // フォールバック
+      return 'http://localhost:5173/'
+    }
+
+    const redirectUrl = getRedirectUrl()
+    console.log('OAuth redirect URL:', redirectUrl)
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`
+        redirectTo: redirectUrl
       }
     })
     if (error) {
