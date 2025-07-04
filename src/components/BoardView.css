@@ -132,3 +132,90 @@
   border-color: rgba(0, 0, 0, 0.25);
   color: #6b7280;
 }
+
+/* スマホ対応のフォームスタイル */
+.add-list-form, .add-card-form {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  min-width: 300px;
+}
+
+.add-list-input, .add-card-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.add-list-input:focus, .add-card-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.add-list-actions, .add-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.add-list-save, .add-card-save {
+  background: #6366f1;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.add-list-save:hover, .add-card-save:hover {
+  background: #5855eb;
+}
+
+.add-list-save:disabled, .add-card-save:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.add-list-cancel, .add-card-cancel {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.add-list-cancel:hover, .add-card-cancel:hover {
+  background: #e5e7eb;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+  .lists-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .add-list-form, .add-card-form {
+    min-width: unset;
+    width: 100%;
+  }
+  
+  .add-list-input, .add-card-input {
+    font-size: 16px; /* iOS のズーム防止 */
+  }
+}

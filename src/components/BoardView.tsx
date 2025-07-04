@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Card, List } from '../types'
 import ListView from './ListView'
+import AddListForm from './AddListForm'
 import { useBoardOperations } from '../hooks/useBoardOperations'
 import { useBoardContext } from '../context/BoardContext'
 import './BoardView.css'
@@ -13,13 +14,7 @@ const BoardView: React.FC = () => {
   const [animatingListId, setAnimatingListId] = useState<string | null>(null)
   const [displacedListIds, setDisplacedListIds] = useState<string[]>([])
   
-  const { addList, reorderLists, moveCard } = useBoardOperations()
-  const handleAddList = async () => {
-    const newListTitle = prompt('新しいリストのタイトルを入力してください:')
-    if (newListTitle && newListTitle.trim()) {
-      await addList(newListTitle.trim())
-    }
-  }
+  const { reorderLists, moveCard } = useBoardOperations()
 
   const handleCardDrop = async (card: Card, targetListId: string, targetIndex?: number) => {
     await moveCard(card, targetListId, targetIndex)
@@ -126,9 +121,7 @@ const BoardView: React.FC = () => {
             </div>
           )
         })}
-        <button className="add-list-btn" onClick={handleAddList}>
-          + リストを追加
-        </button>
+        <AddListForm />
       </div>
     </div>
   )
