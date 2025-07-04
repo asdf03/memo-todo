@@ -1,6 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { useBoardOperations } from '../../hooks/useBoardOperations'
-import './styles/AddListFormDesktop.css'
 
 const AddListFormDesktop: React.FC = () => {
   const [isFormVisible, setIsFormVisible] = useState(false)

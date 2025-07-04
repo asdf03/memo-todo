@@ -1,7 +1,6 @@
 import React, { useState, memo, useCallback } from 'react'
 import { List } from '../../types'
 import { useBoardOperations } from '../../hooks/useBoardOperations'
-import './styles/desktop.css'
 
 interface ListHeaderDesktopProps {
   list: List

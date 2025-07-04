@@ -3,7 +3,6 @@ import { List, Card } from '../../types'
 import ListHeader from './ListHeader'
 import CardContainer from '../CardContainer'
 import ListActions from './common/ListActions'
-import '../ListView.css'
 
 interface ListViewProps {
   list: List

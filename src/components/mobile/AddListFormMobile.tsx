@@ -1,6 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react'
 import { useBoardOperations } from '../../hooks/useBoardOperations'
-import './styles/AddListFormMobile.css'
 
 const AddListFormMobile: React.FC = () => {
   const [isFormVisible, setIsFormVisible] = useState(false)

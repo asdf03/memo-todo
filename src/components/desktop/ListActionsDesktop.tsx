@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react'
 import { useBoardOperations } from '../../hooks/useBoardOperations'
-import './styles/ListActionsDesktop.css'
 
 interface ListActionsDesktopProps {
   listId: string

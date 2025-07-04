@@ -4,7 +4,6 @@ import ListView from '../shared/ListView'
 import AddListForm from '../shared/common/AddListForm'
 import { useBoardOperations } from '../../hooks/useBoardOperations'
 import { useBoardContext } from '../../context/BoardContext'
-import './styles/BoardViewDesktop.css'
 
 const BoardViewDesktop: React.FC = () => {
   const { board } = useBoardContext()

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, memo, useCallback, useRef } from 'react'
 import { Card } from '../../types'
-import './styles/CardViewMobile.css'
 
 interface CardViewMobileProps {
   card: Card

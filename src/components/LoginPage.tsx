@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import './LoginPage.css'
 
 const LoginPage: React.FC = () => {
   const { signInWithOAuth } = useAuth()

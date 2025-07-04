@@ -1,7 +1,6 @@
 import React, { useState, memo, useCallback } from 'react'
 import { List } from '../../types'
 import { useBoardOperations } from '../../hooks/useBoardOperations'
-import './styles/mobile.css'
 
 interface ListHeaderMobileProps {
   list: List
