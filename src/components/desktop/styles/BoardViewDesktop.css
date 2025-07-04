@@ -1,0 +1,169 @@
+.board-view-desktop {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f5f6fa;
+}
+
+.lists-container-desktop {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  padding: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex: 1;
+  align-items: flex-start;
+}
+
+.list-wrapper-desktop {
+  flex-shrink: 0;
+  width: 280px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+  position: relative;
+}
+
+.list-wrapper-desktop:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.list-wrapper-desktop.hovered {
+  border-color: #007bff;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.list-wrapper-desktop.selected {
+  border-color: #28a745;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.list-wrapper-desktop.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+  z-index: 1000;
+}
+
+.list-wrapper-desktop.drag-over {
+  border-color: #ffc107;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  transform: translateY(-4px);
+}
+
+.list-wrapper-desktop.drag-placeholder {
+  opacity: 0.3;
+  transform: scale(0.95);
+}
+
+.list-wrapper-desktop.dropped-animation {
+  animation: dropAnimation 0.5s ease-out;
+}
+
+.list-wrapper-desktop.displaced-animation {
+  animation: displaceAnimation 0.5s ease-out;
+}
+
+@keyframes dropAnimation {
+  0% {
+    transform: scale(1.1) rotate(5deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(0.95) rotate(-2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes displaceAnimation {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(20px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.keyboard-shortcuts-hint {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 1000;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.keyboard-shortcuts-hint:hover {
+  opacity: 1;
+}
+
+.shortcuts-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shortcuts-item kbd {
+  background-color: #555;
+  border: 1px solid #777;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: monospace;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* スクロールバーのスタイル */
+.lists-container-desktop::-webkit-scrollbar {
+  height: 8px;
+}
+
+.lists-container-desktop::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.lists-container-desktop::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.lists-container-desktop::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* フォーカス時のアウトライン */
+.list-wrapper-desktop:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* アクセシビリティ */
+@media (prefers-reduced-motion: reduce) {
+  .list-wrapper-desktop,
+  .list-wrapper-desktop.dropped-animation,
+  .list-wrapper-desktop.displaced-animation {
+    transition: none;
+    animation: none;
+  }
+} 
