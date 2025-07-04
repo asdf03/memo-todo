@@ -23,25 +23,31 @@ const ListView: React.FC<ListViewProps> = ({ list, isAnimating = false, isDispla
   }, [onListDragEnd])
 
   return (
-    <>
-      <div 
-        className={`list-view ${isAnimating ? 'list-dropped-animation' : ''} ${isDisplaced ? 'list-displaced-animation' : ''}`}
-        data-list-id={list.id}
-      >
+    <div 
+      className={`list ${isAnimating ? 'animate-bounce' : ''} ${isDisplaced ? 'animate-fade-in-left' : ''}`}
+      data-list-id={list.id}
+    >
+      <div className="list__header">
         <ListHeader 
           list={list}
           onListDragStart={handleListDragStart}
           onListDragEnd={handleListDragEnd}
         />
-        
-        <CardContainer 
-          list={list}
-          onCardDrop={onCardDrop}
-        />
+      </div>
       
+      <div className="list__content">
+        <div className="list__cards">
+          <CardContainer 
+            list={list}
+            onCardDrop={onCardDrop}
+          />
+        </div>
+      </div>
+    
+      <div className="list__actions">
         <ListActions listId={list.id} />
       </div>
-    </>
+    </div>
   )
 }
 

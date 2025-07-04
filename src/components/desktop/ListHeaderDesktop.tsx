@@ -52,42 +52,48 @@ const ListHeaderDesktop: React.FC<ListHeaderDesktopProps> = memo(({ list, onList
   }, [])
 
   return (
-    <div 
-      className={`list-header ${isDragging ? 'dragging' : ''}`}
-      style={{
-        userSelect: 'none',
-        WebkitUserSelect: 'none',
-        MozUserSelect: 'none',
-        msUserSelect: 'none'
-      }}
-    >
+    <div className="flex items-center justify-between w-full">
       {isEditing ? (
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onBlur={handleSave}
-          className="list-title-input-desktop"
+          onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+          className="input flex-1"
           autoFocus
           maxLength={100}
+          aria-label="リストタイトルを編集"
         />
       ) : (
         <h3
-          className="list-title-desktop"
+          className={`list__title focus-ring ${isDragging ? 'dragging' : ''}`}
           onDoubleClick={handleDoubleClick}
           onMouseDown={handleMouseDown}
           draggable={!isEditing}
           onDragStart={handleListDragStart}
           onDragEnd={handleListDragEnd}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              handleDoubleClick()
+            }
+          }}
+          aria-label={`リスト: ${list.title}。ダブルクリックで編集`}
+          title="ダブルクリックで編集"
         >
           {list.title}
         </h3>
       )}
       <button 
-        className="delete-list-btn"
+        className="btn btn--ghost btn--icon btn--sm focus-ring"
         onClick={handleDeleteList}
+        aria-label={`リスト「${list.title}」を削除`}
+        title="リストを削除"
       >
-        ×
+        <span aria-hidden="true">×</span>
       </button>
     </div>
   )

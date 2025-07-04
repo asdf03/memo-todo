@@ -87,7 +87,7 @@ const AppContent: React.FC = () => {
     return (
       <div className="app">
         <div className="loading-container">
-          <div className="loading-spinner"></div>
+          <div className="loading-spinner" aria-label="読み込み中"></div>
           <div className="loading-text">読み込み中...</div>
         </div>
       </div>
@@ -142,52 +142,60 @@ const AppContent: React.FC = () => {
     <BoardProvider board={board} onUpdateBoard={setBoard} onRefresh={refreshBoard}>
       <div className="app">
         <header className="app-header">
-          <div className="app-header__content">
-            <div className="app-header__left">
-              <div className="app-logo">📝</div>
-              <BoardTitle />
-            </div>
-            <div className="app-header__right">
-              <div className="user-info">
-                <img 
-                  src={user.user_metadata?.avatar_url} 
-                  alt={user.user_metadata?.full_name || 'ユーザー'}
-                  className="user-avatar"
-                />
-                <span className="user-name">{user.user_metadata?.full_name}</span>
+          <div className="container">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="app-logo">📝</div>
+                <BoardTitle />
               </div>
-              <button 
-                className="btn btn--ghost btn--icon" 
-                onClick={refreshBoard}
-                aria-label="更新"
-              >
-                🔄
-              </button>
-              <button 
-                className="btn btn--ghost btn--icon"
-                aria-label="設定"
-              >
-                ⚙️
-              </button>
-              <button 
-                className="btn btn--ghost btn--icon"
-                aria-label="ヘルプ"
-              >
-                ❓
-              </button>
-              <button 
-                className="btn btn--ghost btn--icon" 
-                onClick={handleSignOut}
-                aria-label="ログアウト"
-              >
-                🚪
-              </button>
+              <div className="flex items-center gap-2">
+                <div className="user-info">
+                  <img 
+                    src={user.user_metadata?.avatar_url} 
+                    alt={user.user_metadata?.full_name || 'ユーザー'}
+                    className="user-avatar"
+                  />
+                  <span className="user-name">{user.user_metadata?.full_name}</span>
+                </div>
+                <button 
+                  className="btn btn--ghost btn--icon focus-ring" 
+                  onClick={refreshBoard}
+                  aria-label="ボードを更新"
+                  title="ボードを更新"
+                >
+                  🔄
+                </button>
+                <button 
+                  className="btn btn--ghost btn--icon focus-ring"
+                  aria-label="設定を開く"
+                  title="設定"
+                >
+                  ⚙️
+                </button>
+                <button 
+                  className="btn btn--ghost btn--icon focus-ring"
+                  aria-label="ヘルプを表示"
+                  title="ヘルプ"
+                >
+                  ❓
+                </button>
+                <button 
+                  className="btn btn--ghost btn--icon focus-ring" 
+                  onClick={handleSignOut}
+                  aria-label="ログアウト"
+                  title="ログアウト"
+                >
+                  🚪
+                </button>
+              </div>
             </div>
           </div>
         </header>
         <main className="app-main">
-          <div className="board-container">
-            <BoardView />
+          <div className="container">
+            <div className="board-container">
+              <BoardView />
+            </div>
           </div>
         </main>
       </div>

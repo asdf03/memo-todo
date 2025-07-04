@@ -115,8 +115,8 @@ const BoardViewDesktop: React.FC = () => {
   }, [selectedListIndex])
 
   return (
-    <div className="board-view-desktop">
-      <div className="lists-container-desktop">
+    <div className="board-view">
+      <div className="lists-container">
         {board.lists.map((list, index) => {
           const isDraggedList = draggedListIndex === index
           const isDragOver = dragOverIndex === index
@@ -129,13 +129,16 @@ const BoardViewDesktop: React.FC = () => {
           return (
             <div
               key={list.id}
-              className={`list-wrapper-desktop ${isDraggedList ? 'dragging' : ''} ${isDragOver ? 'drag-over' : ''} ${isPlaceholder ? 'drag-placeholder' : ''} ${isAnimating ? 'dropped-animation' : ''} ${isDisplaced ? 'displaced-animation' : ''} ${isHovered ? 'hovered' : ''} ${isSelected ? 'selected' : ''}`}
+              className={`list-wrapper ${isDraggedList ? 'list-wrapper--dragging' : ''} ${isDragOver ? 'list-wrapper--drag-over' : ''} ${isPlaceholder ? 'list-wrapper--placeholder' : ''} ${isAnimating ? 'animate-fade-in-up' : ''} ${isDisplaced ? 'animate-fade-in-left' : ''} ${isHovered ? 'hovered' : ''} ${isSelected ? 'selected' : ''}`}
               onMouseEnter={() => handleListMouseEnter(index)}
               onMouseLeave={handleListMouseLeave}
               onClick={() => handleListClick(index)}
               onDragOver={(e) => handleListDragOver(e, index)}
               onDragLeave={handleListDragLeave}
               onDrop={(e) => handleListDrop(e, index)}
+              role="region"
+              aria-label={`List: ${list.title}`}
+              tabIndex={0}
             >
               <ListView
                 list={list}
@@ -148,7 +151,9 @@ const BoardViewDesktop: React.FC = () => {
             </div>
           )
         })}
-        <AddListForm />
+        <div className="list-wrapper">
+          <AddListForm />
+        </div>
       </div>
     </div>
   )
