@@ -35,7 +35,21 @@ const AppContent: React.FC = () => {
       setBoardLoading(true)
       setError(null)
       console.log('BoardAPI.getUserBoard呼び出し')
-      const userBoard = await BoardAPI.getUserBoard(user.id)
+      let userBoard = await BoardAPI.getUserBoard(user.id)
+      
+      // 新規ユーザーの場合、自動的にボードを作成
+      if (!userBoard) {
+        console.log('ボードが見つかりません。新しいボードを作成します')
+        try {
+          await BoardAPI.createBoard(user.id)
+          userBoard = await BoardAPI.getUserBoard(user.id)
+          console.log('新しいボードを作成しました:', userBoard)
+        } catch (createError) {
+          console.error('ボード作成に失敗しました:', createError)
+          throw new Error(`新規ボードの作成に失敗しました: ${createError instanceof Error ? createError.message : String(createError)}`)
+        }
+      }
+      
       console.log('ボード取得成功:', userBoard)
       setBoard(userBoard)
     } catch (err) {

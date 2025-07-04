@@ -31,7 +31,12 @@ VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-### 3. 開発サーバーの起動
+### 3. データベースセットアップ
+Supabaseダッシュボードの SQL Editor で実行：
+1. `database/schema.sql` - 基本テーブル作成
+2. `database/security-policies.sql` - セキュリティ強化（オプション）
+
+### 4. 開発サーバーの起動
 ```bash
 npm run dev
 ```
