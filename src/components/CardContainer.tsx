@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { List, Card } from '../types'
-import CardView from './CardView'
+import CardView from './shared/CardView'
 import { useBoardOperations } from '../hooks/useBoardOperations'
 
 interface CardContainerProps {
@@ -80,7 +80,11 @@ const CardContainer: React.FC<CardContainerProps> = ({ list, onCardDrop }) => {
     e.stopPropagation()
     
     const cardData = e.dataTransfer.getData('application/json')
-    const sourceListId = e.dataTransfer.getData('text/sourceList')
+    let sourceListId = e.dataTransfer.getData('text/sourceList')
+    
+    if (!sourceListId) {
+      sourceListId = list.id
+    }
     
     if (cardData && e.dataTransfer.types.includes('text/card') && !e.dataTransfer.types.includes('text/list')) {
       try {
@@ -116,11 +120,12 @@ const CardContainer: React.FC<CardContainerProps> = ({ list, onCardDrop }) => {
           key={card.id}
           card={card}
           cardIndex={cardIndex}
+          listId={list.id}
           isDragOver={cardDragOverIndex === cardIndex}
           onDelete={() => handleDeleteCard(card.id)}
           onUpdate={(updatedCard) => handleUpdateCard(card.id, updatedCard)}
           onDragStart={(e) => handleCardDragStart(e, card)}
-          onDragOver={handleCardDragOver}
+          onDragOver={(e) => handleCardDragOver(e, cardIndex)}
           onDrop={handleCardDrop}
         />
       ))}

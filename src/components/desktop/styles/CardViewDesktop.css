@@ -1,0 +1,244 @@
+/* デスクトップ専用CardViewスタイル */
+.card-view-desktop {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 8px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  min-height: 40px;
+}
+
+.card-view-desktop:hover {
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.card-view-desktop.card-drag-over {
+  background: rgba(99, 102, 241, 0.1);
+  border: 2px dashed #6366f1;
+  transform: scale(1.02);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+}
+
+.card-view-desktop.dragging {
+  opacity: 0.6;
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.card-content-desktop {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-title-desktop {
+  font-size: 14px;
+  margin-bottom: 4px;
+  word-wrap: break-word;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.4;
+}
+
+.card-description-desktop {
+  font-size: 12px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  color: #6b7280;
+  margin: 0;
+}
+
+.delete-card-btn-desktop {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.delete-card-btn-desktop:hover {
+  background: #dc2626;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* 編集モード */
+.card-edit-desktop {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 2px solid #6366f1;
+}
+
+.card-title-input-desktop {
+  width: 100%;
+  font-size: 14px;
+  color: #172b4d;
+  border: 2px solid #6366f1;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 8px;
+  outline: none;
+  font-weight: 600;
+  background: white;
+}
+
+.card-description-input-desktop {
+  width: 100%;
+  font-size: 12px;
+  color: #172b4d;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 8px;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  min-height: 60px;
+}
+
+.card-description-input-desktop:focus {
+  border-color: #6366f1;
+}
+
+.card-edit-actions-desktop {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.save-btn-desktop {
+  background-color: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 60px;
+}
+
+.save-btn-desktop:hover {
+  background-color: #5855eb;
+  transform: translateY(-1px);
+}
+
+.cancel-btn-desktop {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 60px;
+}
+
+.cancel-btn-desktop:hover {
+  background: #e5e7eb;
+  color: #4b5563;
+  transform: translateY(-1px);
+}
+
+/* ドラッグ中のカーソル */
+.card-view-desktop[draggable="true"] {
+  cursor: grab;
+}
+
+.card-view-desktop[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* キーボードフォーカス */
+.card-view-desktop:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.card-title-input-desktop:focus,
+.card-description-input-desktop:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* 削除ボタンのホバー効果 */
+.card-view-desktop:hover .delete-card-btn-desktop {
+  opacity: 1;
+}
+
+/* 高密度表示用の調整 */
+@media (min-width: 1200px) {
+  .card-view-desktop {
+    padding: 10px;
+    margin-bottom: 6px;
+  }
+  
+  .card-title-desktop {
+    font-size: 13px;
+  }
+  
+  .card-description-desktop {
+    font-size: 11px;
+  }
+  
+  .delete-card-btn-desktop {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+  }
+}
+
+/* アニメーション */
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-view-desktop.slide-in {
+  animation: cardSlideIn 0.3s ease-out;
+}
+
+/* ドラッグ時のプレビュー */
+.card-view-desktop.drag-preview {
+  opacity: 0.8;
+  transform: rotate(2deg);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+} 

@@ -1,0 +1,243 @@
+/* モバイル専用CardViewスタイル */
+.card-view-mobile {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 12px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  touch-action: none;
+  min-height: 60px; /* タッチフレンドリーなサイズ */
+}
+
+.card-view-mobile:active {
+  background: rgba(0, 0, 0, 0.05);
+  transform: scale(0.98);
+}
+
+.card-view-mobile.card-drag-over {
+  background: rgba(99, 102, 241, 0.1);
+  border: 2px dashed #6366f1;
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+}
+
+.card-view-mobile.dragging {
+  opacity: 0.7;
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.card-content-mobile {
+  flex: 1;
+  min-width: 0; /* テキストオーバーフロー対応 */
+}
+
+.card-title-mobile {
+  font-size: 16px;
+  margin-bottom: 8px;
+  word-wrap: break-word;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1.4;
+}
+
+.card-description-mobile {
+  font-size: 14px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  color: #6b7280;
+  margin: 0;
+}
+
+.delete-card-btn-mobile {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  opacity: 0.8;
+  touch-action: manipulation;
+  flex-shrink: 0;
+}
+
+.delete-card-btn-mobile:active {
+  background: #dc2626;
+  transform: scale(0.95);
+  opacity: 1;
+}
+
+/* 編集モード */
+.card-edit-mobile {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 2px solid #6366f1;
+}
+
+.card-title-input-mobile {
+  width: 100%;
+  font-size: 16px;
+  color: #172b4d;
+  border: 2px solid #6366f1;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  outline: none;
+  font-weight: 600;
+  background: white;
+}
+
+.card-description-input-mobile {
+  width: 100%;
+  font-size: 14px;
+  color: #172b4d;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  min-height: 80px;
+}
+
+.card-description-input-mobile:focus {
+  border-color: #6366f1;
+}
+
+.card-edit-actions-mobile {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.save-btn-mobile {
+  background-color: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.save-btn-mobile:active {
+  background-color: #5855eb;
+  transform: scale(0.95);
+}
+
+.cancel-btn-mobile {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.cancel-btn-mobile:active {
+  background: #e5e7eb;
+  color: #4b5563;
+  transform: scale(0.95);
+}
+
+/* 長押しフィードバック */
+@keyframes longPressHighlight {
+  0% { 
+    background-color: transparent; 
+    transform: scale(1);
+  }
+  50% { 
+    background-color: rgba(99, 102, 241, 0.1); 
+    transform: scale(1.02);
+  }
+  100% { 
+    background-color: transparent; 
+    transform: scale(1);
+  }
+}
+
+.card-view-mobile.long-press-active {
+  animation: longPressHighlight 0.4s ease-in-out;
+}
+
+/* タッチフィードバック */
+.card-view-mobile:active {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* ドラッグ中のボディスタイル */
+body.mobile-dragging .card-view-mobile {
+  touch-action: none;
+}
+
+/* 小さい画面用の調整 */
+@media (max-width: 480px) {
+  .card-view-mobile {
+    padding: 12px;
+    gap: 8px;
+  }
+  
+  .card-title-mobile {
+    font-size: 14px;
+  }
+  
+  .card-description-mobile {
+    font-size: 12px;
+  }
+  
+  .delete-card-btn-mobile {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+  
+  .card-edit-mobile {
+    padding: 12px;
+  }
+  
+  .card-title-input-mobile,
+  .card-description-input-mobile {
+    padding: 10px;
+  }
+  
+  .save-btn-mobile,
+  .cancel-btn-mobile {
+    padding: 10px 16px;
+    font-size: 12px;
+    min-width: 70px;
+  }
+} 

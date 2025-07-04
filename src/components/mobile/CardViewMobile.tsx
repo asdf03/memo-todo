@@ -1,21 +1,23 @@
 import React, { useState, useEffect, memo, useCallback, useRef } from 'react'
-import { Card } from '../types'
-import './CardView.css'
+import { Card } from '../../types'
+import './styles/CardViewMobile.css'
 
-interface CardViewProps {
+interface CardViewMobileProps {
   card: Card
   cardIndex: number
-  onDelete: () => void
-  onUpdate: (card: Partial<Card>) => void
-  onDragStart?: (e: React.DragEvent, card: Card, cardIndex: number) => void
-  onDragOver?: (e: React.DragEvent, cardIndex: number) => void
-  onDrop?: (e: React.DragEvent, cardIndex: number) => void
+  listId: string
+  onDelete: (cardId: string) => void
+  onUpdate: (cardId: string, updatedCard: Partial<Card>) => void
+  onDragStart: (e: React.DragEvent, card: Card, cardIndex: number) => void
+  onDragOver: (e: React.DragEvent) => void
+  onDrop: (e: React.DragEvent, targetIndex: number) => void
   isDragOver?: boolean
 }
 
-const CardView: React.FC<CardViewProps> = memo(({ 
+const CardViewMobile: React.FC<CardViewMobileProps> = memo(({ 
   card, 
   cardIndex,
+  listId,
   onDelete, 
   onUpdate, 
   onDragStart, 
@@ -48,7 +50,7 @@ const CardView: React.FC<CardViewProps> = memo(({
 
   const handleSave = useCallback(() => {
     if (titleInput.trim()) {
-      onUpdate({
+      onUpdate(card.id, {
         title: titleInput.trim(),
         description: descriptionInput.trim() || undefined
       })
@@ -57,7 +59,7 @@ const CardView: React.FC<CardViewProps> = memo(({
       setDescriptionInput(card.description || '')
     }
     setIsEditing(false)
-  }, [titleInput, descriptionInput, onUpdate, card.title, card.description])
+  }, [titleInput, descriptionInput, onUpdate, card.title, card.description, card.id])
 
   const handleCancel = useCallback(() => {
     setTitleInput(card.title)
@@ -71,23 +73,12 @@ const CardView: React.FC<CardViewProps> = memo(({
     }
   }, [isEditing])
 
-
   const handleDeleteClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
     if (confirm(`カード「${card.title}」を削除しますか？`)) {
-      onDelete()
+      onDelete(card.id)
     }
-  }, [card.title, onDelete])
-
-
-  const handleDragStart = useCallback((e: React.DragEvent) => {
-    setIsDragging(true)
-    onDragStart?.(e, card, cardIndex)
-  }, [card, cardIndex, onDragStart])
-
-  const handleDragEnd = useCallback(() => {
-    setIsDragging(false)
-  }, [])
+  }, [card.title, onDelete, card.id])
 
   // モバイル長押しドラッグ
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -96,7 +87,7 @@ const CardView: React.FC<CardViewProps> = memo(({
     const touch = e.touches[0]
     touchStartPos.current = { x: touch.clientX, y: touch.clientY }
     
-    // 長押しタイマー開始（400msに短縮）
+    // 長押しタイマー開始（400ms）
     longPressTimer.current = setTimeout(() => {
       setIsDragging(true)
       
@@ -115,9 +106,9 @@ const CardView: React.FC<CardViewProps> = memo(({
         stopPropagation: () => {}
       } as React.DragEvent
       
-      onDragStart?.(fakeEvent, card, cardIndex)
-    }, 400) // 400msに短縮
-  }, [isEditing, card, cardIndex, onDragStart])
+      onDragStart(fakeEvent, card, cardIndex)
+    }, 400)
+  }, [isEditing, card, onDragStart, cardIndex])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!touchStartPos.current) return
@@ -126,7 +117,7 @@ const CardView: React.FC<CardViewProps> = memo(({
     const deltaX = Math.abs(touch.clientX - touchStartPos.current.x)
     const deltaY = Math.abs(touch.clientY - touchStartPos.current.y)
     
-    // 移動閾値を緩くする（10px → 15px）
+    // 移動閾値を緩くする（15px）
     if (!isDragging && (deltaX > 15 || deltaY > 15)) {
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current)
@@ -141,10 +132,10 @@ const CardView: React.FC<CardViewProps> = memo(({
       // ドラッグ中の視覚的フィードバック
       const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
       if (elementBelow) {
-        const cardBelow = elementBelow.closest('.card-view')
+        const cardBelow = elementBelow.closest('.card-view-mobile')
         if (cardBelow && cardBelow !== e.currentTarget) {
           // 他のカードにドラッグオーバー効果を適用
-          const allCards = document.querySelectorAll('.card-view')
+          const allCards = document.querySelectorAll('.card-view-mobile')
           allCards.forEach(card => card.classList.remove('card-drag-over'))
           cardBelow.classList.add('card-drag-over')
         }
@@ -163,54 +154,90 @@ const CardView: React.FC<CardViewProps> = memo(({
       const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
       
       if (elementBelow) {
-        const cardBelow = elementBelow.closest('.card-view')
-        if (cardBelow) {
-          // ドロップイベントをシミュレート
+        // 他のカードにドロップする場合
+        const targetCard = elementBelow.closest('.card-view-mobile')
+        if (targetCard && targetCard !== e.currentTarget) {
+          const targetCardIndex = parseInt(targetCard.getAttribute('data-card-index') || '0')
+          
+          // カスタムドロップイベントを作成
           const dropEvent = new CustomEvent('drop', {
             bubbles: true,
-            cancelable: true,
-            detail: {
-              card: card,
-              cardIndex: cardIndex
-            }
-          })
+            cancelable: true
+          }) as any
           
           // dataTransferプロパティを設定
           Object.defineProperty(dropEvent, 'dataTransfer', {
             value: {
+              types: ['text/card', 'application/json', 'text/sourceList'],
               getData: (type: string) => {
                 if (type === 'text/card') return card.id
                 if (type === 'application/json') return JSON.stringify(card)
+                if (type === 'text/sourceList') return listId
                 return ''
               }
             },
             writable: false
           })
           
-          // preventDefault メソッドを追加
           Object.defineProperty(dropEvent, 'preventDefault', {
             value: () => {},
             writable: false
           })
           
-          cardBelow.dispatchEvent(dropEvent)
+          onDrop(dropEvent, targetCardIndex)
           
           // 成功フィードバック
           if (navigator.vibrate) {
             navigator.vibrate([30, 50, 30])
           }
+        } else {
+          // 空のスペースまたはカードコンテナにドロップ
+          const targetContainer = elementBelow.closest('.cards-container')
+          if (targetContainer) {
+            // カスタムドロップイベントを作成
+            const dropEvent = new CustomEvent('drop', {
+              bubbles: true,
+              cancelable: true
+            }) as any
+            
+            // dataTransferプロパティを設定
+            Object.defineProperty(dropEvent, 'dataTransfer', {
+              value: {
+                types: ['text/card', 'application/json', 'text/sourceList'],
+                getData: (type: string) => {
+                  if (type === 'text/card') return card.id
+                  if (type === 'application/json') return JSON.stringify(card)
+                  if (type === 'text/sourceList') return listId
+                  return ''
+                }
+              },
+              writable: false
+            })
+            
+            Object.defineProperty(dropEvent, 'preventDefault', {
+              value: () => {},
+              writable: false
+            })
+            
+            targetContainer.dispatchEvent(dropEvent)
+            
+            // 成功フィードバック
+            if (navigator.vibrate) {
+              navigator.vibrate([30, 50, 30])
+            }
+          }
         }
       }
       
       // ドラッグオーバー効果を削除
-      const allCards = document.querySelectorAll('.card-view')
+      const allCards = document.querySelectorAll('.card-view-mobile')
       allCards.forEach(card => card.classList.remove('card-drag-over'))
       
       setIsDragging(false)
     }
     
     touchStartPos.current = null
-  }, [isDragging, card, cardIndex])
+  }, [isDragging, card, onDrop, listId])
 
   const handleTouchCancel = useCallback(() => {
     if (longPressTimer.current) {
@@ -220,40 +247,32 @@ const CardView: React.FC<CardViewProps> = memo(({
     touchStartPos.current = null
     
     if (isDragging) {
-      handleDragEnd()
+      setIsDragging(false)
     }
-  }, [isDragging, handleDragEnd])
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    onDragOver?.(e, cardIndex)
-  }, [onDragOver, cardIndex])
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    onDrop?.(e, cardIndex)
-  }, [onDrop, cardIndex])
+  }, [isDragging])
 
   if (isEditing) {
     return (
-      <div className="card-edit">
+      <div className="card-edit-mobile">
         <input
-          className="card-title-input"
+          className="card-title-input-mobile"
           value={titleInput}
           onChange={(e) => setTitleInput(e.target.value)}
           placeholder="カードのタイトル"
           autoFocus
         />
         <textarea
-          className="card-description-input"
+          className="card-description-input-mobile"
           value={descriptionInput}
           onChange={(e) => setDescriptionInput(e.target.value)}
           placeholder="説明（オプション）"
           rows={3}
         />
-        <div className="card-edit-actions">
-          <button className="save-btn" onClick={handleSave}>
+        <div className="card-edit-actions-mobile">
+          <button className="save-btn-mobile" onClick={handleSave}>
             保存
           </button>
-          <button className="cancel-btn" onClick={handleCancel}>
+          <button className="cancel-btn-mobile" onClick={handleCancel}>
             キャンセル
           </button>
         </div>
@@ -262,46 +281,41 @@ const CardView: React.FC<CardViewProps> = memo(({
   }
 
   return (
-    <>
-      <div 
-        className={`card-view ${isDragOver ? 'card-drag-over' : ''} ${isDragging ? 'dragging' : ''}`}
-        draggable={!isEditing}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        onClick={handleCardClick}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchCancel}
-        style={{
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          MozUserSelect: 'none',
-          msUserSelect: 'none'
-        }}
-      >
-        <div className="card-content">
-          <h4 className="card-title">
-            {card.title}
-          </h4>
-          {card.description && (
-            <p className="card-description">
-              {card.description}
-            </p>
-          )}
-        </div>
-        <button 
-          className="delete-card-btn"
-          onClick={handleDeleteClick}
-        >
-          ×
-        </button>
+    <div 
+      className={`card-view-mobile ${isDragOver ? 'card-drag-over' : ''} ${isDragging ? 'dragging' : ''}`}
+      onClick={handleCardClick}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchCancel}
+      onDragOver={onDragOver}
+      style={{
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        MozUserSelect: 'none',
+        msUserSelect: 'none',
+        touchAction: 'none'
+      }}
+      data-card-index={cardIndex}
+    >
+      <div className="card-content-mobile">
+        <h4 className="card-title-mobile">
+          {card.title}
+        </h4>
+        {card.description && (
+          <p className="card-description-mobile">
+            {card.description}
+          </p>
+        )}
       </div>
-      
-    </>
+      <button 
+        className="delete-card-btn-mobile"
+        onClick={handleDeleteClick}
+      >
+        ×
+      </button>
+    </div>
   )
 })
 
-export default CardView
+export default CardViewMobile 
