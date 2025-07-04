@@ -1,5 +1,5 @@
 /* モバイル専用スタイル */
-.list-header {
+.list-header-mobile {
   position: relative;
   padding: 12px 16px;
   background: #f8f9fa;
@@ -10,9 +10,13 @@
   justify-content: space-between;
   min-height: 48px; /* タッチフレンドリーなサイズ */
   touch-action: none; /* タッチアクションを無効化 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
-.list-header.dragging {
+.list-header-mobile.dragging {
   opacity: 0.7;
   transform: scale(1.05);
   background: #e3f2fd;
@@ -21,7 +25,7 @@
   transition: all 0.2s ease;
 }
 
-.list-title {
+.list-title-mobile {
   flex: 1;
   margin: 0;
   font-size: 16px;
@@ -36,13 +40,15 @@
   -moz-user-select: none;
   -ms-user-select: none;
   touch-action: none;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
-.list-title:active {
+.list-title-mobile:active {
   background: rgba(0, 0, 0, 0.05);
 }
 
-.list-title-input {
+.list-title-input-mobile {
   flex: 1;
   border: 2px solid #6366f1;
   border-radius: 4px;
@@ -51,9 +57,10 @@
   font-weight: 600;
   outline: none;
   background: white;
+  touch-action: manipulation;
 }
 
-.delete-list-btn {
+.delete-list-btn-mobile {
   background: #ef4444;
   color: white;
   border: none;
@@ -69,15 +76,17 @@
   transition: all 0.2s ease;
   margin-left: 8px;
   touch-action: manipulation;
+  flex-shrink: 0;
 }
 
-.delete-list-btn:hover {
+.delete-list-btn-mobile:hover {
   background: #dc2626;
   transform: scale(1.05);
 }
 
-.delete-list-btn:active {
+.delete-list-btn-mobile:active {
   transform: scale(0.95);
+  background: #b91c1c;
 }
 
 /* ドラッグ中のボディスタイル */
@@ -90,8 +99,8 @@
   -ms-user-select: none !important;
 }
 
-/* ドラッグオーバー効果 */
-.list-wrapper.drag-over {
+/* ドラッグオーバー効果 - モバイル用クラス名に更新 */
+.list-wrapper-mobile.drag-over {
   background: rgba(99, 102, 241, 0.1);
   border: 2px dashed #6366f1;
   border-radius: 8px;
@@ -100,7 +109,7 @@
 }
 
 /* モバイル用のドラッグプレースホルダー */
-.list-wrapper.drag-placeholder {
+.list-wrapper-mobile.drag-placeholder {
   opacity: 0.5;
   transform: scale(0.95);
   transition: all 0.2s ease;
@@ -124,7 +133,7 @@
 }
 
 /* タッチフィードバック */
-.list-header:active,
+.list-header-mobile:active,
 .card-view:active {
   background: rgba(0, 0, 0, 0.05);
 }
@@ -145,23 +154,23 @@
   }
 }
 
-.list-header.long-press-active {
+.list-header-mobile.long-press-active {
   animation: longPressIndicator 0.4s ease-in-out;
 }
 
 /* レスポンシブ調整 */
 @media (max-width: 480px) {
-  .list-header {
+  .list-header-mobile {
     padding: 10px 12px;
     min-height: 44px;
   }
   
-  .list-title {
+  .list-title-mobile {
     font-size: 14px;
     padding: 6px;
   }
   
-  .delete-list-btn {
+  .delete-list-btn-mobile {
     width: 28px;
     height: 28px;
     font-size: 16px;

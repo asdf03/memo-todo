@@ -19,14 +19,6 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
   const longPressTimer = useRef<NodeJS.Timeout | null>(null)
   const touchStartPos = useRef<{ x: number; y: number } | null>(null)
   const dragStartTime = useRef<number>(0)
-  
-  // デバッグ用
-  const debugMode = useRef(true)
-  const debugLog = useCallback((message: string, data?: any) => {
-    if (debugMode.current) {
-      console.log(`[Mobile Debug] ${message}`, data || '')
-    }
-  }, [])
 
   useEffect(() => {
     setTitleInput(list.title)
@@ -51,7 +43,6 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
   }, [titleInput, list.title, list.id, updateListTitle])
 
   const startDragging = useCallback(() => {
-    debugLog('Starting drag mode')
     setIsDragging(true)
     setLongPressStarted(true)
     dragStartTime.current = Date.now()
@@ -77,10 +68,9 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
     } as unknown as React.DragEvent
     
     onListDragStart?.(fakeEvent, list)
-  }, [list, onListDragStart, debugLog])
+  }, [list, onListDragStart])
 
   const endDragging = useCallback(() => {
-    debugLog('Ending drag mode')
     setIsDragging(false)
     setLongPressStarted(false)
     
@@ -94,13 +84,10 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
     })
     
     onListDragEnd?.()
-  }, [onListDragEnd, debugLog])
+  }, [onListDragEnd])
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    debugLog('Touch start', { isEditingTitle, touchesLength: e.touches.length })
-    
     if (isEditingTitle || isDragging) {
-      debugLog('Touch start ignored', { isEditingTitle, isDragging })
       return
     }
     
@@ -110,22 +97,16 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
     const touch = e.touches[0]
     touchStartPos.current = { x: touch.clientX, y: touch.clientY }
     
-    debugLog('Touch start position set', touchStartPos.current)
-    
-    // 長押しタイマー開始（少し短めに設定）
+    // 長押しタイマー開始
     longPressTimer.current = setTimeout(() => {
-      debugLog('Long press timer fired')
       if (touchStartPos.current) {
         startDragging()
       }
-    }, 400) // 400msに短縮
-    
-    debugLog('Long press timer started (400ms)')
-  }, [isEditingTitle, isDragging, startDragging, debugLog])
+    }, 400)
+  }, [isEditingTitle, isDragging, startDragging])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!touchStartPos.current) {
-      debugLog('Touch move ignored - no start position')
       return
     }
     
@@ -136,11 +117,8 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
     const deltaX = Math.abs(touch.clientX - touchStartPos.current.x)
     const deltaY = Math.abs(touch.clientY - touchStartPos.current.y)
     
-    debugLog('Touch move', { deltaX, deltaY, isDragging, longPressStarted })
-    
     // ドラッグ開始前の移動判定を緩くする
     if (!isDragging && !longPressStarted && (deltaX > 15 || deltaY > 15)) {
-      debugLog('Canceling long press due to movement')
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current)
         longPressTimer.current = null
@@ -150,7 +128,6 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
     
     // ドラッグ中の場合、視覚的フィードバックを提供
     if (isDragging) {
-      debugLog('Providing drag feedback')
       e.preventDefault() // スクロールを防止
       
       // ドラッグ中の他のリストにドラッグオーバー効果を適用
@@ -170,23 +147,19 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
         }
       }
     }
-  }, [isDragging, longPressStarted, list.id, debugLog])
+  }, [isDragging, longPressStarted, list.id])
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    debugLog('Touch end', { isDragging, hasTimer: !!longPressTimer.current })
-    
     // イベント伝播を停止
     e.stopPropagation()
     
     // 長押しタイマーをクリア
     if (longPressTimer.current) {
-      debugLog('Clearing long press timer')
       clearTimeout(longPressTimer.current)
       longPressTimer.current = null
     }
     
     if (isDragging) {
-      debugLog('Processing drag end')
       const touch = e.changedTouches[0]
       const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
       
@@ -199,11 +172,7 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
             wrapper.querySelector(`[data-list-id="${list.id}"]`)
           )
           
-          debugLog('Drop calculation', { dropIndex, currentIndex })
-          
           if (dropIndex !== -1 && currentIndex !== -1 && dropIndex !== currentIndex) {
-            debugLog('Dispatching drop event')
-            
             // カスタムドロップイベントを作成してディスパッチ
             const dropEvent = new CustomEvent('drop', {
               bubbles: true,
@@ -255,11 +224,9 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
     }
     
     touchStartPos.current = null
-    debugLog('Touch end cleanup completed')
-  }, [isDragging, endDragging, list, debugLog])
+  }, [isDragging, endDragging, list])
 
   const handleTouchCancel = useCallback(() => {
-    debugLog('Touch cancel')
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current)
       longPressTimer.current = null
@@ -269,7 +236,7 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
     if (isDragging) {
       endDragging()
     }
-  }, [isDragging, endDragging, debugLog])
+  }, [isDragging, endDragging])
 
   const handleDeleteList = useCallback(async () => {
     if (confirm(`リスト「${list.title}」を削除しますか？`)) {
@@ -292,34 +259,12 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
 
   return (
     <div 
-      className={`list-header ${isDragging ? 'dragging' : ''}`}
-      style={{
-        userSelect: 'none',
-        WebkitUserSelect: 'none',
-        MozUserSelect: 'none',
-        msUserSelect: 'none'
-      }}
+      className={`list-header-mobile ${isDragging ? 'dragging' : ''}`}
+      data-list-id={list.id}
     >
-      {/* デバッグ情報表示 */}
-      {debugMode.current && (
-        <div style={{ 
-          fontSize: '10px', 
-          color: '#666', 
-          position: 'absolute', 
-          top: '-20px', 
-          left: '0',
-          background: 'rgba(255,255,255,0.8)',
-          padding: '2px 4px',
-          borderRadius: '2px',
-          zIndex: 1000
-        }}>
-          {isDragging ? 'DRAGGING' : 'IDLE'} | Timer: {longPressTimer.current ? 'ON' : 'OFF'} | LongPress: {longPressStarted ? 'YES' : 'NO'}
-        </div>
-      )}
-      
       {isEditingTitle ? (
         <input
-          className="list-title-input"
+          className="list-title-input-mobile"
           value={titleInput}
           onChange={(e) => setTitleInput(e.target.value)}
           onBlur={handleTitleSave}
@@ -328,27 +273,20 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
         />
       ) : (
         <h3 
-          className="list-title" 
+          className="list-title-mobile" 
           onClick={() => setIsEditingTitle(true)}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           onTouchCancel={handleTouchCancel}
-          style={{
-            cursor: 'pointer',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            MozUserSelect: 'none',
-            msUserSelect: 'none',
-            touchAction: 'none'
-          }}
         >
           {list.title}
         </h3>
       )}
       <button 
-        className="delete-list-btn"
+        className="delete-list-btn-mobile"
         onClick={handleDeleteClick}
+        aria-label="リストを削除"
       >
         ×
       </button>
