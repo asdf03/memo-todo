@@ -6,9 +6,10 @@ interface ListHeaderProps {
   list: List
   onListDragStart?: (e: React.DragEvent, list: List) => void
   onListDragEnd?: () => void
+  onEditingChange?: (isEditing: boolean) => void
 }
 
-const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onListDragEnd }) => {
+const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onListDragEnd, onEditingChange }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [titleInput, setTitleInput] = useState(list.title)
   const [isDragging, setIsDragging] = useState(false)
@@ -20,6 +21,11 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onL
   useEffect(() => {
     setTitleInput(list.title)
   }, [list.title])
+
+  // 編集状態の変更を親に通知
+  useEffect(() => {
+    onEditingChange?.(isEditingTitle)
+  }, [isEditingTitle, onEditingChange])
 
   // クリーンアップ
   useEffect(() => {
@@ -63,7 +69,7 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onL
       // PC版のドラッグイベントをシミュレート
       const fakeEvent = {
         dataTransfer: {
-          setData: (type: string, data: string) => {},
+          setData: (_type: string, _data: string) => {},
           effectAllowed: 'move'
         },
         preventDefault: () => {},

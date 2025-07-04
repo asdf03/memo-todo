@@ -5,7 +5,6 @@ import './CardView.css'
 interface CardViewProps {
   card: Card
   cardIndex: number
-  listId: string
   onDelete: () => void
   onUpdate: (card: Partial<Card>) => void
   onDragStart?: (e: React.DragEvent, card: Card, cardIndex: number) => void
@@ -17,13 +16,12 @@ interface CardViewProps {
 const CardView: React.FC<CardViewProps> = memo(({ 
   card, 
   cardIndex,
-  listId, 
   onDelete, 
   onUpdate, 
   onDragStart, 
   onDragOver, 
   onDrop, 
-  isDragOver 
+  isDragOver
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [titleInput, setTitleInput] = useState(card.title)
@@ -103,7 +101,7 @@ const CardView: React.FC<CardViewProps> = memo(({
       // PC版のドラッグイベントをシミュレート
       const fakeEvent = {
         dataTransfer: {
-          setData: (type: string, data: string) => {},
+          setData: (_type: string, _data: string) => {},
           effectAllowed: 'move'
         },
         preventDefault: () => {},
