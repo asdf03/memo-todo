@@ -1,6 +1,5 @@
-import React, { useState, useEffect, memo, useCallback } from 'react'
+import React, { useState, useEffect, memo, useCallback, useRef } from 'react'
 import { Card } from '../types'
-import { useLongPressDrag } from '../hooks/useLongPressDrag'
 import './CardView.css'
 
 interface CardViewProps {
@@ -17,7 +16,8 @@ interface CardViewProps {
 
 const CardView: React.FC<CardViewProps> = memo(({ 
   card, 
-  cardIndex, 
+  cardIndex,
+  listId, 
   onDelete, 
   onUpdate, 
   onDragStart, 
@@ -28,14 +28,25 @@ const CardView: React.FC<CardViewProps> = memo(({
   const [isEditing, setIsEditing] = useState(false)
   const [titleInput, setTitleInput] = useState(card.title)
   const [descriptionInput, setDescriptionInput] = useState(card.description || '')
-  const [isTouchDragging, setIsTouchDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null)
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null)
   
   // cardが変更されたらinputも更新
   useEffect(() => {
     setTitleInput(card.title)
     setDescriptionInput(card.description || '')
   }, [card.title, card.description])
+
+  // クリーンアップ
+  useEffect(() => {
+    return () => {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current)
+      }
+    }
+  }, [])
 
   const handleSave = useCallback(() => {
     if (titleInput.trim()) {
@@ -70,84 +81,78 @@ const CardView: React.FC<CardViewProps> = memo(({
     }
   }, [card.title, onDelete])
 
-  // 長押し後ドラッグ機能
-  const longPressDrag = useLongPressDrag({
-    onDragStart: () => {
-      setIsTouchDragging(true)
-      
-      // PC版と同じようにDragEventをシミュレート
-      const fakeEvent = {
-        dataTransfer: {
-          setData: (type: string, data: string) => {
-            // データをグローバルに保存
-            (window as any).__dragData = (window as any).__dragData || {}
-            ;(window as any).__dragData[type] = data
-          },
-          types: ['application/json', 'text/card']
-        }
-      } as any
-      
-      onDragStart?.(fakeEvent, card, cardIndex)
-    },
-    onDragMove: (_, deltaX, deltaY) => {
-      setDragOffset({ x: deltaX, y: deltaY })
-    },
-    onDragEnd: (_, endX, endY) => {
-      // PC版と同じドロップ処理
-      const elementBelow = document.elementFromPoint(endX, endY)
-      
-      if (elementBelow) {
-        // カードのドロップイベントをシミュレート
-        const cardElement = elementBelow.closest('.card-view')
-        if (cardElement) {
-          const fakeDropEvent = {
-            preventDefault: () => {},
-            stopPropagation: () => {},
-            dataTransfer: {
-              getData: (type: string) => {
-                return (window as any).__dragData?.[type] || ''
-              },
-              types: ['application/json', 'text/card']
-            }
-          } as any
-          
-          const cardIndex = parseInt(cardElement.getAttribute('data-card-index') || '0')
-          onDrop?.(fakeDropEvent, cardIndex)
-        }
-        // リストコンテナへのドロップ
-        else {
-          const listContainer = elementBelow.closest('.cards-container')
-          if (listContainer) {
-            const fakeDropEvent = {
-              preventDefault: () => {},
-              stopPropagation: () => {},
-              dataTransfer: {
-                getData: (type: string) => {
-                  return (window as any).__dragData?.[type] || ''
-                },
-                types: ['application/json', 'text/card']
-              }
-            } as any
-            
-            // リストのドロップイベントを発火
-            listContainer.dispatchEvent(new CustomEvent('touch-drop', {
-              detail: { fakeDropEvent }
-            }))
-          }
-        }
-      }
-      
-      // リセット
-      setIsTouchDragging(false)
-      setDragOffset({ x: 0, y: 0 })
-      delete (window as any).__dragData
-    },
-    longPressDelay: 500
-  })
 
   const handleDragStart = useCallback((e: React.DragEvent) => {
+    setIsDragging(true)
     onDragStart?.(e, card, cardIndex)
-  }, [onDragStart, card, cardIndex])
+  }, [card, cardIndex, onDragStart])
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false)
+  }, [])
+
+  // モバイル長押しドラッグ
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (isEditing) return
+    
+    const touch = e.touches[0]
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY }
+    
+    // 長押しタイマー開始
+    longPressTimer.current = setTimeout(() => {
+      // PC版のドラッグイベントをシミュレート
+      const fakeEvent = {
+        dataTransfer: {
+          setData: (type: string, data: string) => {},
+          effectAllowed: 'move'
+        },
+        preventDefault: () => {},
+        stopPropagation: () => {}
+      } as React.DragEvent
+      
+      handleDragStart(fakeEvent)
+    }, 500)
+  }, [isEditing, handleDragStart])
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartPos.current) return
+    
+    const touch = e.touches[0]
+    const deltaX = Math.abs(touch.clientX - touchStartPos.current.x)
+    const deltaY = Math.abs(touch.clientY - touchStartPos.current.y)
+    
+    // 一定以上移動したら長押し取消
+    if (deltaX > 10 || deltaY > 10) {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current)
+        longPressTimer.current = null
+      }
+    }
+  }, [])
+
+  const handleTouchEnd = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+    touchStartPos.current = null
+    
+    if (isDragging) {
+      handleDragEnd()
+    }
+  }, [isDragging, handleDragEnd])
+
+  const handleTouchCancel = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+    touchStartPos.current = null
+    
+    if (isDragging) {
+      handleDragEnd()
+    }
+  }, [isDragging, handleDragEnd])
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     onDragOver?.(e, cardIndex)
@@ -189,21 +194,22 @@ const CardView: React.FC<CardViewProps> = memo(({
   return (
     <>
       <div 
-        className={`card-view ${isDragOver ? 'card-drag-over' : ''} ${isTouchDragging ? 'touch-dragging' : ''}`}
+        className={`card-view ${isDragOver ? 'card-drag-over' : ''} ${isDragging ? 'dragging' : ''}`}
         draggable={!isEditing}
         onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onClick={isTouchDragging ? undefined : handleCardClick}
-        onTouchStart={longPressDrag.onTouchStart}
-        onTouchMove={longPressDrag.onTouchMove}
-        onTouchEnd={longPressDrag.onTouchEnd}
-        onTouchCancel={longPressDrag.onTouchCancel}
-        data-card-index={cardIndex}
+        onClick={handleCardClick}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
         style={{
-          transform: isTouchDragging ? `translate(${dragOffset.x}px, ${dragOffset.y}px)` : 'none',
-          zIndex: isTouchDragging ? 1000 : 'auto',
-          opacity: isTouchDragging ? 0.8 : 1
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          MozUserSelect: 'none',
+          msUserSelect: 'none'
         }}
       >
         <div className="card-content">

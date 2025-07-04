@@ -1,11 +1,8 @@
-import React, { useState } from 'react'
+import React, { useRef, useState, useEffect, useCallback } from 'react'
 import { List, Card } from '../types'
 import ListHeader from './ListHeader'
 import CardContainer from './CardContainer'
 import ListActions from './ListActions'
-import { useLongPressDrag } from '../hooks/useLongPressDrag'
-import { useBoardOperations } from '../hooks/useBoardOperations'
-import { useBoardContext } from '../context/BoardContext'
 import './ListView.css'
 
 interface ListViewProps {
@@ -18,94 +15,125 @@ interface ListViewProps {
 }
 
 const ListView: React.FC<ListViewProps> = ({ list, isAnimating = false, isDisplaced = false, onCardDrop, onListDragStart, onListDragEnd }) => {
-  const [isTouchDragging, setIsTouchDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
   
-  const { board } = useBoardContext()
-  const { reorderLists } = useBoardOperations()
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null)
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null)
   
-  // 長押し後リストドラッグ機能（カードコンテナエリアのみ）
-  const longPressDrag = useLongPressDrag({
-    onDragStart: () => {
-      setIsTouchDragging(true)
-      
-      // PC版と同じようにDragEventをシミュレート
+  // クリーンアップ
+  useEffect(() => {
+    return () => {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current)
+      }
+    }
+  }, [])
+
+  // PC版のドラッグイベントハンドラー
+  const handleDragStart = useCallback((e: React.DragEvent) => {
+    setIsDragging(true)
+    onListDragStart?.(e, list)
+  }, [list, onListDragStart])
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false)
+    onListDragEnd?.()
+  }, [onListDragEnd])
+
+  // モバイル長押しドラッグ（カードコンテナエリアでのみ）
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // リストヘッダーの編集モード時やカードコンテナエリア以外では無効
+    const target = e.target as HTMLElement
+    if (!target.closest('.cards-container')) return
+    
+    const touch = e.touches[0]
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY }
+    
+    // 長押しタイマー開始
+    longPressTimer.current = setTimeout(() => {
+      // PC版のドラッグイベントをシミュレート
       const fakeEvent = {
         dataTransfer: {
-          setData: (type: string, data: string) => {
-            (window as any).__listDragData = (window as any).__listDragData || {}
-            ;(window as any).__listDragData[type] = data
-          },
-          types: ['text/list', 'application/json']
-        }
-      } as any
+          setData: (type: string, data: string) => {},
+          effectAllowed: 'move'
+        },
+        preventDefault: () => {},
+        stopPropagation: () => {}
+      } as React.DragEvent
       
-      onListDragStart?.(fakeEvent, list)
-    },
-    onDragMove: (_, deltaX, deltaY) => {
-      setDragOffset({ x: deltaX, y: deltaY })
-    },
-    onDragEnd: (_, endX, endY) => {
-      // PC版と同じドロップ処理
-      const elementBelow = document.elementFromPoint(endX, endY)
-      if (elementBelow) {
-        const targetListElement = elementBelow.closest('[data-list-id]')
-        if (targetListElement) {
-          const targetListId = targetListElement.getAttribute('data-list-id')
-          if (targetListId && targetListId !== list.id) {
-            const currentIndex = board.lists.findIndex(l => l.id === list.id)
-            const targetIndex = board.lists.findIndex(l => l.id === targetListId)
-            if (currentIndex !== -1 && targetIndex !== -1) {
-              reorderLists(currentIndex, targetIndex)
-            }
-          }
-        }
+      handleDragStart(fakeEvent)
+    }, 500)
+  }, [handleDragStart])
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartPos.current) return
+    
+    const touch = e.touches[0]
+    const deltaX = Math.abs(touch.clientX - touchStartPos.current.x)
+    const deltaY = Math.abs(touch.clientY - touchStartPos.current.y)
+    
+    // 一定以上移動したら長押し取消
+    if (deltaX > 10 || deltaY > 10) {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current)
+        longPressTimer.current = null
       }
-      
-      onListDragEnd?.()
-      
-      // リセット
-      setIsTouchDragging(false)
-      setDragOffset({ x: 0, y: 0 })
-      delete (window as any).__listDragData
-    },
-    longPressDelay: 500
-  })
-  
+    }
+  }, [])
+
+  const handleTouchEnd = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+    touchStartPos.current = null
+    
+    if (isDragging) {
+      handleDragEnd()
+    }
+  }, [isDragging, handleDragEnd])
+
+  const handleTouchCancel = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+    touchStartPos.current = null
+    
+    if (isDragging) {
+      handleDragEnd()
+    }
+  }, [isDragging, handleDragEnd])
 
   return (
     <>
       <div 
-        className={`list-view ${isAnimating ? 'list-dropped-animation' : ''} ${isDisplaced ? 'list-displaced-animation' : ''} ${isTouchDragging ? 'touch-dragging' : ''}`}
+        className={`list-view ${isAnimating ? 'list-dropped-animation' : ''} ${isDisplaced ? 'list-displaced-animation' : ''} ${isDragging ? 'dragging' : ''}`}
         data-list-id={list.id}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
         style={{
-          transform: isTouchDragging ? `translate(${dragOffset.x}px, ${dragOffset.y}px)` : 'none',
-          zIndex: isTouchDragging ? 1000 : 'auto',
-          opacity: isTouchDragging ? 0.8 : 1
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          MozUserSelect: 'none',
+          msUserSelect: 'none'
         }}
       >
         <ListHeader 
           list={list}
-          onListDragStart={onListDragStart}
-          onListDragEnd={onListDragEnd}
+          onListDragStart={handleDragStart}
+          onListDragEnd={handleDragEnd}
         />
         
-        <div 
-          className="list-drag-handle"
-          onTouchStart={longPressDrag.onTouchStart}
-          onTouchMove={longPressDrag.onTouchMove}
-          onTouchEnd={longPressDrag.onTouchEnd}
-          onTouchCancel={longPressDrag.onTouchCancel}
-        >
-          <CardContainer 
-            list={list}
-            onCardDrop={onCardDrop}
-          />
-        </div>
+        <CardContainer 
+          list={list}
+          onCardDrop={onCardDrop}
+        />
       
         <ListActions listId={list.id} />
       </div>
-      
     </>
   )
 }
