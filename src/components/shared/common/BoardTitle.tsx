@@ -1,6 +1,6 @@
 import React, { useState, useEffect, memo } from 'react'
-import { useBoardOperations } from '../hooks/useBoardOperations'
-import { useBoardContext } from '../context/BoardContext'
+import { useBoardOperations } from '../../../hooks/useBoardOperations'
+import { useBoardContext } from '../../../context/BoardContext'
 import './BoardTitle.css'
 
 const BoardTitle: React.FC = memo(() => {

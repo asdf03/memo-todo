@@ -1,0 +1,74 @@
+/* モバイル専用スタイル */
+
+/* 長押しドラッグ用スタイル */
+.list-header.mobile-dragging {
+  opacity: 0.8;
+  transform: scale(1.05);
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.list-header.mobile-dragging .list-title {
+  color: #007bff;
+  font-weight: bold;
+}
+
+/* タッチ操作用の調整 */
+.list-title {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* モバイルドラッグ中のスクロール無効化 */
+body.mobile-dragging {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+/* ドラッグオーバー効果 */
+.list-wrapper.drag-over {
+  background-color: rgba(0, 123, 255, 0.1);
+  border: 2px dashed #007bff;
+  transform: scale(1.02);
+  transition: all 0.2s ease;
+}
+
+/* ハプティックフィードバック用の視覚効果 */
+.list-header.haptic-feedback {
+  animation: pulse 0.1s ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* タッチデバイス用のボタンサイズ調整 */
+.delete-list-btn {
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+/* 長押しインジケーター */
+.long-press-indicator {
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  height: 2px;
+  background-color: #007bff;
+  border-radius: 1px;
+  transition: width 0.4s ease-out;
+}
+
+.long-press-indicator.active {
+  width: 100%;
+} 

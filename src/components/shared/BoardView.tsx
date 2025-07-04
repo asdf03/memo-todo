@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import { Card, List } from '../types'
+import { Card, List } from '../../types'
 import ListView from './ListView'
-import AddListForm from './AddListForm'
-import { useBoardOperations } from '../hooks/useBoardOperations'
-import { useBoardContext } from '../context/BoardContext'
-import './BoardView.css'
+import AddListForm from './common/AddListForm'
+import { useBoardOperations } from '../../hooks/useBoardOperations'
+import { useBoardContext } from '../../context/BoardContext'
+import '../BoardView.css'
 
 const BoardView: React.FC = () => {
   const { board } = useBoardContext()

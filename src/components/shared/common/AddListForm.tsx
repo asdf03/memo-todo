@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useState } from 'react'
-import { useBoardOperations } from '../hooks/useBoardOperations'
+import { useBoardOperations } from '../../../hooks/useBoardOperations'
 
 const AddListForm: React.FC = memo(() => {
   const { addList } = useBoardOperations()

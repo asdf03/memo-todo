@@ -1,0 +1,90 @@
+/* デスクトップ専用スタイル */
+
+/* マウスホバー効果 */
+.list-header:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+  transition: background-color 0.2s ease;
+}
+
+.list-title:hover {
+  color: #007bff;
+  transition: color 0.2s ease;
+}
+
+/* ドラッグカーソル */
+.list-title[draggable="true"] {
+  cursor: grab;
+}
+
+.list-title[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* ドラッグ中のスタイル */
+.list-header.dragging {
+  opacity: 0.6;
+  transform: rotate(2deg);
+  transition: all 0.2s ease;
+}
+
+/* キーボードフォーカス */
+.list-title:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.list-title-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* デスクトップ用のボタンスタイル */
+.delete-list-btn:hover {
+  background-color: #dc3545;
+  color: white;
+  transform: scale(1.1);
+  transition: all 0.2s ease;
+}
+
+/* ドラッグドロップ視覚効果 */
+.list-wrapper.drag-over {
+  background-color: rgba(0, 123, 255, 0.05);
+  border: 1px dashed #007bff;
+  transition: all 0.2s ease;
+}
+
+/* スムーズアニメーション */
+.list-header {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* 右クリックメニュー対応 */
+.list-header {
+  position: relative;
+}
+
+.context-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 120px;
+}
+
+.context-menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.context-menu-item:hover {
+  background-color: #f5f5f5;
+}
+
+.context-menu-item:last-child {
+  border-bottom: none;
+} 

@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useState } from 'react'
-import { useBoardOperations } from '../hooks/useBoardOperations'
+import { useBoardOperations } from '../../../hooks/useBoardOperations'
 
 interface ListActionsProps {
   listId: string
