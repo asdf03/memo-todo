@@ -18,11 +18,8 @@ interface TouchPosition {
 export const useSwipeGesture = (config: SwipeGestureConfig) => {
   const {
     threshold = 50,
-    velocity = 0.3,
     onSwipeLeft,
-    onSwipeRight,
-    onSwipeUp,
-    onSwipeDown
+    onSwipeRight
   } = config
 
   const touchStart = useRef<TouchPosition | null>(null)
@@ -52,40 +49,48 @@ export const useSwipeGesture = (config: SwipeGestureConfig) => {
   }, [])
 
   const handleTouchEnd = useCallback(() => {
-    if (!touchStart.current || !touchEnd.current) return
+    if (!touchStart.current) return
 
-    const deltaX = touchEnd.current.x - touchStart.current.x
-    const deltaY = touchEnd.current.y - touchStart.current.y
-    const deltaTime = touchEnd.current.time - touchStart.current.time
-    
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-    const swipeVelocity = distance / deltaTime
-
-    // 最小距離と速度をチェック
-    if (distance < threshold || swipeVelocity < velocity) {
+    // touchEnd がない場合（タップのみ）は何もしない
+    if (!touchEnd.current) {
+      touchStart.current = null
       return
     }
 
-    // スワイプ方向を判定（横方向を優先）
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      // 横スワイプ
-      if (deltaX > 0) {
-        onSwipeRight?.()
-      } else {
-        onSwipeLeft?.()
-      }
+    const deltaX = touchEnd.current.x - touchStart.current.x
+    const deltaY = touchEnd.current.y - touchStart.current.y
+    
+    const horizontalDistance = Math.abs(deltaX)
+    const verticalDistance = Math.abs(deltaY)
+    
+    // 横スワイプを優先し、縦方向の動きが大きい場合はスワイプとして認識しない
+    if (verticalDistance > horizontalDistance * 1.5) {
+      touchStart.current = null
+      touchEnd.current = null
+      return
+    }
+
+    // 最小距離をチェック（速度チェックは削除してより反応しやすく）
+    if (horizontalDistance < threshold) {
+      touchStart.current = null
+      touchEnd.current = null
+      return
+    }
+
+    console.log('Swipe detected:', { deltaX, deltaY, horizontalDistance, threshold })
+
+    // 横スワイプ
+    if (deltaX > 0) {
+      console.log('Swipe right triggered')
+      onSwipeRight?.()
     } else {
-      // 縦スワイプ
-      if (deltaY > 0) {
-        onSwipeDown?.()
-      } else {
-        onSwipeUp?.()
-      }
+      console.log('Swipe left triggered')
+      onSwipeLeft?.()
     }
 
     touchStart.current = null
     touchEnd.current = null
-  }, [threshold, velocity, onSwipeLeft, onSwipeRight, onSwipeUp, onSwipeDown])
+  }, [threshold, onSwipeLeft, onSwipeRight])
 
   return {
     onTouchStart: handleTouchStart,

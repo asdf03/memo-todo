@@ -52,10 +52,15 @@ const ListView: React.FC<ListViewProps> = ({ list, isAnimating = false, isDispla
 
   // スワイプジェスチャーの設定
   const swipeGesture = useSwipeGesture({
-    threshold: 100, // リストは大きいので閾値を大きく
-    velocity: 0.4,
-    onSwipeLeft: () => handleSwipeList('left'),
-    onSwipeRight: () => handleSwipeList('right')
+    threshold: 60, // より反応しやすく
+    onSwipeLeft: () => {
+      console.log('List swipe left handler called')
+      handleSwipeList('left')
+    },
+    onSwipeRight: () => {
+      console.log('List swipe right handler called')
+      handleSwipeList('right')
+    }
   })
 
   // 長押し検出（スワイプと併用）
@@ -66,11 +71,13 @@ const ListView: React.FC<ListViewProps> = ({ list, isAnimating = false, isDispla
     setIsSwiping(false)
     swipeGesture.onTouchStart(e)
     
+    // 長押しタイマーをもっと長くしてスワイプと競合しにくく
     const timer = setTimeout(() => {
       if (!isSwiping) {
+        console.log('Long press triggered for list')
         handleLongPress()
       }
-    }, 700) // 700ms長押し（カードより少し長め）
+    }, 1000) // 1000ms長押し（スワイプと競合しにくく）
     setPressTimer(timer)
   }, [handleLongPress, isSwiping, swipeGesture])
 
@@ -78,10 +85,14 @@ const ListView: React.FC<ListViewProps> = ({ list, isAnimating = false, isDispla
     setIsSwiping(true)
     swipeGesture.onTouchMove(e)
     
+    // 移動中は長押しをキャンセル
     if (pressTimer) {
       clearTimeout(pressTimer)
       setPressTimer(null)
     }
+    
+    // スワイプ時は他のイベントをブロック
+    e.stopPropagation()
   }, [pressTimer, swipeGesture])
 
   const handleTouchEnd = useCallback(() => {

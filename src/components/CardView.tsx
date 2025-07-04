@@ -97,10 +97,15 @@ const CardView: React.FC<CardViewProps> = memo(({
 
   // スワイプジェスチャーの設定
   const swipeGesture = useSwipeGesture({
-    threshold: 80, // より大きな閾値でスワイプを検出
-    velocity: 0.5,
-    onSwipeLeft: () => handleSwipeCard('left'),
-    onSwipeRight: () => handleSwipeCard('right')
+    threshold: 50, // より反応しやすく
+    onSwipeLeft: () => {
+      console.log('Card swipe left handler called')
+      handleSwipeCard('left')
+    },
+    onSwipeRight: () => {
+      console.log('Card swipe right handler called')
+      handleSwipeCard('right')
+    }
   })
 
   // 長押し検出（スワイプと併用）
@@ -111,11 +116,13 @@ const CardView: React.FC<CardViewProps> = memo(({
     setIsSwiping(false)
     swipeGesture.onTouchStart(e)
     
+    // 長押しタイマーをもっと長くしてスワイプと競合しにくく
     const timer = setTimeout(() => {
       if (!isSwiping) {
+        console.log('Long press triggered for card')
         handleLongPress()
       }
-    }, 500) // 500ms長押し
+    }, 800) // 800ms長押し（スワイプと競合しにくく）
     setPressTimer(timer)
   }, [handleLongPress, isSwiping, swipeGesture])
 
@@ -123,11 +130,17 @@ const CardView: React.FC<CardViewProps> = memo(({
     setIsSwiping(true)
     swipeGesture.onTouchMove(e)
     
+    // 移動中は長押しをキャンセル
     if (pressTimer) {
       clearTimeout(pressTimer)
       setPressTimer(null)
     }
-  }, [pressTimer, swipeGesture])
+    
+    // 編集中でない場合のみスワイプを許可
+    if (!isEditing) {
+      e.stopPropagation()
+    }
+  }, [pressTimer, swipeGesture, isEditing])
 
   const handleTouchEnd = useCallback(() => {
     swipeGesture.onTouchEnd()
