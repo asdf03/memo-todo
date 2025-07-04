@@ -162,13 +162,6 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onL
   return (
     <div 
       className={`list-header ${isDragging ? 'dragging' : ''}`}
-      draggable={!isEditingTitle}
-      onDragStart={handleListDragStart}
-      onDragEnd={handleListDragEnd}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onTouchCancel={handleTouchCancel}
       style={{
         userSelect: 'none',
         WebkitUserSelect: 'none',
@@ -189,6 +182,20 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onL
         <h3 
           className="list-title" 
           onClick={() => setIsEditingTitle(true)}
+          draggable={!isEditingTitle}
+          onDragStart={handleListDragStart}
+          onDragEnd={handleListDragEnd}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchCancel}
+          style={{
+            cursor: !isEditingTitle ? 'grab' : 'text',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            MozUserSelect: 'none',
+            msUserSelect: 'none'
+          }}
         >
           {list.title}
         </h3>
