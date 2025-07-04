@@ -1,11 +1,5 @@
 import React, { useState, useEffect, memo, useCallback } from 'react'
 import { Card } from '../types'
-import MobileCardActions from './MobileCardActions'
-import MobileOverlay from './MobileOverlay'
-import { useSwipeGesture } from '../hooks/useSwipeGesture'
-import { useBoardContext } from '../context/BoardContext'
-import { useBoardOperations } from '../hooks/useBoardOperations'
-import { findDropTarget } from '../utils/dropDetection'
 import './CardView.css'
 
 interface CardViewProps {
@@ -23,7 +17,6 @@ interface CardViewProps {
 const CardView: React.FC<CardViewProps> = memo(({ 
   card, 
   cardIndex, 
-  listId,
   onDelete, 
   onUpdate, 
   onDragStart, 
@@ -32,13 +25,8 @@ const CardView: React.FC<CardViewProps> = memo(({
   isDragOver 
 }) => {
   const [isEditing, setIsEditing] = useState(false)
-  const [showMobileActions, setShowMobileActions] = useState(false)
   const [titleInput, setTitleInput] = useState(card.title)
   const [descriptionInput, setDescriptionInput] = useState(card.description || '')
-  const [swipeOffset, setSwipeOffset] = useState(0)
-  
-  const { board } = useBoardContext()
-  const { moveCard } = useBoardOperations()
   
   // cardが変更されたらinputも更新
   useEffect(() => {
@@ -71,124 +59,6 @@ const CardView: React.FC<CardViewProps> = memo(({
     }
   }, [isEditing])
 
-  const handleLongPress = useCallback(() => {
-    setShowMobileActions(true)
-  }, [])
-
-  // スワイプでカードを移動（旧ロジック）
-  const handleSwipeCardOld = useCallback((direction: 'left' | 'right') => {
-    const currentListIndex = board.lists.findIndex(list => list.id === listId)
-    let targetListIndex: number
-    
-    if (direction === 'left') {
-      targetListIndex = currentListIndex - 1
-    } else {
-      targetListIndex = currentListIndex + 1
-    }
-    
-    if (targetListIndex >= 0 && targetListIndex < board.lists.length) {
-      const targetList = board.lists[targetListIndex]
-      moveCard(card, targetList.id)
-      
-      // スワイプアニメーション
-      setSwipeOffset(direction === 'left' ? -300 : 300)
-      setTimeout(() => setSwipeOffset(0), 300)
-    }
-  }, [board.lists, listId, card, moveCard])
-
-  // スワイプ終了時のドロップ処理
-  const handleSwipeEnd = useCallback((endX: number, endY: number, deltaX: number, deltaY: number) => {
-    console.log('Card swipe end:', { endX, endY, deltaX, deltaY })
-    
-    // 最小移動距離をチェック
-    const horizontalDistance = Math.abs(deltaX)
-    if (horizontalDistance < 50) {
-      setSwipeOffset(0)
-      return
-    }
-    
-    // ドロップ位置でターゲットを検索
-    const dropTarget = findDropTarget(endX, endY)
-    console.log('Drop target found:', dropTarget)
-    
-    if (dropTarget && dropTarget.type === 'list' && dropTarget.id !== listId) {
-      // 別のリストに移動
-      moveCard(card, dropTarget.id)
-      console.log(`Card moved to list: ${dropTarget.id}`)
-    } else if (!dropTarget) {
-      // ドロップターゲットがない場合は隣接リストに移動
-      const direction = deltaX > 0 ? 'right' : 'left'
-      handleSwipeCardOld(direction)
-    }
-    
-    // アニメーションリセット
-    setSwipeOffset(0)
-  }, [card, listId, moveCard, handleSwipeCardOld])
-
-  // スワイプジェスチャーの設定
-  const swipeGesture = useSwipeGesture({
-    threshold: 50,
-    onSwipeMove: (deltaX) => {
-      // スワイプ中のビジュアルフィードバック
-      if (Math.abs(deltaX) > 20) {
-        setSwipeOffset(deltaX * 0.8) // 指に追従するアニメーション
-      }
-    },
-    onSwipeEnd: handleSwipeEnd,
-    onSwipeLeft: () => {
-      console.log('Card swipe left fallback')
-      handleSwipeCardOld('left')
-    },
-    onSwipeRight: () => {
-      console.log('Card swipe right fallback')
-      handleSwipeCardOld('right')
-    }
-  })
-
-  // 長押し検出（スワイプと併用）
-  const [pressTimer, setPressTimer] = useState<NodeJS.Timeout | null>(null)
-  const [isSwiping, setIsSwiping] = useState(false)
-  
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    setIsSwiping(false)
-    swipeGesture.onTouchStart(e)
-    
-    // 長押しタイマーをもっと長くしてスワイプと競合しにくく
-    const timer = setTimeout(() => {
-      if (!isSwiping) {
-        console.log('Long press triggered for card')
-        handleLongPress()
-      }
-    }, 800) // 800ms長押し（スワイプと競合しにくく）
-    setPressTimer(timer)
-  }, [handleLongPress, isSwiping, swipeGesture])
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    setIsSwiping(true)
-    swipeGesture.onTouchMove(e)
-    
-    // 移動中は長押しをキャンセル
-    if (pressTimer) {
-      clearTimeout(pressTimer)
-      setPressTimer(null)
-    }
-    
-    // 編集中でない場合のみスワイプを許可
-    if (!isEditing) {
-      e.stopPropagation()
-    }
-  }, [pressTimer, swipeGesture, isEditing])
-
-  const handleTouchEnd = useCallback(() => {
-    swipeGesture.onTouchEnd()
-    
-    if (pressTimer) {
-      clearTimeout(pressTimer)
-      setPressTimer(null)
-    }
-    
-    setTimeout(() => setIsSwiping(false), 100)
-  }, [pressTimer, swipeGesture])
 
   const handleDeleteClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
@@ -247,16 +117,6 @@ const CardView: React.FC<CardViewProps> = memo(({
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         onClick={handleCardClick}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
-        data-card-id={card.id}
-        data-card-index={cardIndex}
-        style={{
-          transform: `translateX(${swipeOffset}px)`,
-          transition: swipeOffset === 0 ? 'transform 0.3s ease' : 'none'
-        }}
       >
         <div className="card-content">
           <h4 className="card-title">
@@ -269,32 +129,13 @@ const CardView: React.FC<CardViewProps> = memo(({
           )}
         </div>
         <button 
-          className="delete-card-btn desktop-only"
+          className="delete-card-btn"
           onClick={handleDeleteClick}
         >
           ×
         </button>
-        <button 
-          className="mobile-card-menu mobile-only"
-          onClick={(e) => {
-            e.stopPropagation()
-            setShowMobileActions(true)
-          }}
-        >
-          ⋮
-        </button>
       </div>
       
-      <MobileOverlay 
-        isOpen={showMobileActions} 
-        onClose={() => setShowMobileActions(false)}
-      >
-        <MobileCardActions 
-          card={card}
-          currentListId={listId}
-          onClose={() => setShowMobileActions(false)}
-        />
-      </MobileOverlay>
     </>
   )
 })
