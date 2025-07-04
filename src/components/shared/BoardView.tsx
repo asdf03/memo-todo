@@ -9,17 +9,21 @@ const BoardView: React.FC = () => {
 
   // プラットフォーム専用CSS動的読み込み
   useEffect(() => {
-    if (isUsingMobileView) {
-      // モバイル専用スタイル読み込み
-      require('../mobile/styles/BoardViewMobile.css');
-      require('../mobile/styles/CardViewMobile.css');
-      require('../mobile/styles/ListActionsMobile.css');
-    } else {
-      // デスクトップ専用スタイル読み込み
-      require('../desktop/styles/BoardViewDesktop.css');
-      require('../desktop/styles/CardViewDesktop.css');
-      require('../desktop/styles/ListActionsDesktop.css');
-    }
+    const loadPlatformCSS = async () => {
+      if (isUsingMobileView) {
+        // モバイル専用スタイル読み込み
+        await import('../mobile/styles/BoardViewMobile.css');
+        await import('../mobile/styles/CardViewMobile.css');
+        await import('../mobile/styles/ListActionsMobile.css');
+      } else {
+        // デスクトップ専用スタイル読み込み
+        await import('../desktop/styles/BoardViewDesktop.css');
+        await import('../desktop/styles/CardViewDesktop.css');
+        await import('../desktop/styles/ListActionsDesktop.css');
+      }
+    };
+    
+    loadPlatformCSS();
   }, [isUsingMobileView]);
 
   // デバッグ用（本番環境では削除）
