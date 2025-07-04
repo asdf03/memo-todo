@@ -8,6 +8,7 @@ import MobileOverlay from './MobileOverlay'
 import { useSwipeGesture } from '../hooks/useSwipeGesture'
 import { useBoardContext } from '../context/BoardContext'
 import { useBoardOperations } from '../hooks/useBoardOperations'
+import { findDropTarget } from '../utils/dropDetection'
 import './ListView.css'
 
 interface ListViewProps {
@@ -30,8 +31,8 @@ const ListView: React.FC<ListViewProps> = ({ list, isAnimating = false, isDispla
     setShowMobileActions(true)
   }, [])
 
-  // スワイプでリストを移動
-  const handleSwipeList = useCallback((direction: 'left' | 'right') => {
+  // スワイプでリストを移動（旧ロジック）
+  const handleSwipeListOld = useCallback((direction: 'left' | 'right') => {
     const currentIndex = board.lists.findIndex(l => l.id === list.id)
     let targetIndex: number
     
@@ -50,16 +51,56 @@ const ListView: React.FC<ListViewProps> = ({ list, isAnimating = false, isDispla
     }
   }, [board.lists, list.id, reorderLists])
 
+  // スワイプ終了時のドロップ処理
+  const handleSwipeEnd = useCallback((endX: number, endY: number, deltaX: number, deltaY: number) => {
+    console.log('List swipe end:', { endX, endY, deltaX, deltaY })
+    
+    // 最小移動距離をチェック
+    const horizontalDistance = Math.abs(deltaX)
+    if (horizontalDistance < 60) {
+      setSwipeOffset(0)
+      return
+    }
+    
+    // ドロップ位置でターゲットを検索
+    const dropTarget = findDropTarget(endX, endY)
+    console.log('List drop target found:', dropTarget)
+    
+    if (dropTarget && dropTarget.type === 'list' && dropTarget.id !== list.id) {
+      // 別のリストと交換
+      const currentIndex = board.lists.findIndex(l => l.id === list.id)
+      const targetIndex = dropTarget.index
+      if (currentIndex !== -1 && targetIndex !== -1) {
+        reorderLists(currentIndex, targetIndex)
+        console.log(`List moved from ${currentIndex} to ${targetIndex}`)
+      }
+    } else if (!dropTarget) {
+      // ドロップターゲットがない場合は隣接リストと交換
+      const direction = deltaX > 0 ? 'right' : 'left'
+      handleSwipeListOld(direction)
+    }
+    
+    // アニメーションリセット
+    setSwipeOffset(0)
+  }, [list.id, board.lists, reorderLists, handleSwipeListOld])
+
   // スワイプジェスチャーの設定
   const swipeGesture = useSwipeGesture({
-    threshold: 60, // より反応しやすく
+    threshold: 60,
+    onSwipeMove: (deltaX) => {
+      // スワイプ中のビジュアルフィードバック
+      if (Math.abs(deltaX) > 30) {
+        setSwipeOffset(deltaX * 0.6) // 指に追従するアニメーション
+      }
+    },
+    onSwipeEnd: handleSwipeEnd,
     onSwipeLeft: () => {
-      console.log('List swipe left handler called')
-      handleSwipeList('left')
+      console.log('List swipe left fallback')
+      handleSwipeListOld('left')
     },
     onSwipeRight: () => {
-      console.log('List swipe right handler called')
-      handleSwipeList('right')
+      console.log('List swipe right fallback')
+      handleSwipeListOld('right')
     }
   })
 
@@ -114,6 +155,8 @@ const ListView: React.FC<ListViewProps> = ({ list, isAnimating = false, isDispla
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
+        data-list-id={list.id}
+        data-list-index={board.lists.findIndex(l => l.id === list.id)}
         style={{
           transform: `translateX(${swipeOffset}px)`,
           transition: swipeOffset === 0 ? 'transform 0.3s ease' : 'none'

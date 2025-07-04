@@ -5,6 +5,7 @@ import MobileOverlay from './MobileOverlay'
 import { useSwipeGesture } from '../hooks/useSwipeGesture'
 import { useBoardContext } from '../context/BoardContext'
 import { useBoardOperations } from '../hooks/useBoardOperations'
+import { findDropTarget } from '../utils/dropDetection'
 import './CardView.css'
 
 interface CardViewProps {
@@ -74,8 +75,8 @@ const CardView: React.FC<CardViewProps> = memo(({
     setShowMobileActions(true)
   }, [])
 
-  // スワイプでカードを移動
-  const handleSwipeCard = useCallback((direction: 'left' | 'right') => {
+  // スワイプでカードを移動（旧ロジック）
+  const handleSwipeCardOld = useCallback((direction: 'left' | 'right') => {
     const currentListIndex = board.lists.findIndex(list => list.id === listId)
     let targetListIndex: number
     
@@ -95,16 +96,52 @@ const CardView: React.FC<CardViewProps> = memo(({
     }
   }, [board.lists, listId, card, moveCard])
 
+  // スワイプ終了時のドロップ処理
+  const handleSwipeEnd = useCallback((endX: number, endY: number, deltaX: number, deltaY: number) => {
+    console.log('Card swipe end:', { endX, endY, deltaX, deltaY })
+    
+    // 最小移動距離をチェック
+    const horizontalDistance = Math.abs(deltaX)
+    if (horizontalDistance < 50) {
+      setSwipeOffset(0)
+      return
+    }
+    
+    // ドロップ位置でターゲットを検索
+    const dropTarget = findDropTarget(endX, endY)
+    console.log('Drop target found:', dropTarget)
+    
+    if (dropTarget && dropTarget.type === 'list' && dropTarget.id !== listId) {
+      // 別のリストに移動
+      moveCard(card, dropTarget.id)
+      console.log(`Card moved to list: ${dropTarget.id}`)
+    } else if (!dropTarget) {
+      // ドロップターゲットがない場合は隣接リストに移動
+      const direction = deltaX > 0 ? 'right' : 'left'
+      handleSwipeCardOld(direction)
+    }
+    
+    // アニメーションリセット
+    setSwipeOffset(0)
+  }, [card, listId, moveCard, handleSwipeCardOld])
+
   // スワイプジェスチャーの設定
   const swipeGesture = useSwipeGesture({
-    threshold: 50, // より反応しやすく
+    threshold: 50,
+    onSwipeMove: (deltaX) => {
+      // スワイプ中のビジュアルフィードバック
+      if (Math.abs(deltaX) > 20) {
+        setSwipeOffset(deltaX * 0.8) // 指に追従するアニメーション
+      }
+    },
+    onSwipeEnd: handleSwipeEnd,
     onSwipeLeft: () => {
-      console.log('Card swipe left handler called')
-      handleSwipeCard('left')
+      console.log('Card swipe left fallback')
+      handleSwipeCardOld('left')
     },
     onSwipeRight: () => {
-      console.log('Card swipe right handler called')
-      handleSwipeCard('right')
+      console.log('Card swipe right fallback')
+      handleSwipeCardOld('right')
     }
   })
 
@@ -214,6 +251,8 @@ const CardView: React.FC<CardViewProps> = memo(({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
+        data-card-id={card.id}
+        data-card-index={cardIndex}
         style={{
           transform: `translateX(${swipeOffset}px)`,
           transition: swipeOffset === 0 ? 'transform 0.3s ease' : 'none'

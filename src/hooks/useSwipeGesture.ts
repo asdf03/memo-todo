@@ -2,11 +2,10 @@ import { useRef, useCallback } from 'react'
 
 interface SwipeGestureConfig {
   threshold?: number // スワイプを検出する最小距離（px）
-  velocity?: number // スワイプの最小速度（px/ms）
   onSwipeLeft?: () => void
   onSwipeRight?: () => void
-  onSwipeUp?: () => void
-  onSwipeDown?: () => void
+  onSwipeMove?: (deltaX: number, deltaY: number) => void
+  onSwipeEnd?: (endX: number, endY: number, deltaX: number, deltaY: number) => void
 }
 
 interface TouchPosition {
@@ -45,8 +44,12 @@ export const useSwipeGesture = (config: SwipeGestureConfig) => {
         y: touch.clientY,
         time: Date.now()
       }
+      
+      const deltaX = touch.clientX - touchStart.current.x
+      const deltaY = touch.clientY - touchStart.current.y
+      config.onSwipeMove?.(deltaX, deltaY)
     }
-  }, [])
+  }, [config])
 
   const handleTouchEnd = useCallback(() => {
     if (!touchStart.current) return
@@ -78,6 +81,9 @@ export const useSwipeGesture = (config: SwipeGestureConfig) => {
     }
 
     console.log('Swipe detected:', { deltaX, deltaY, horizontalDistance, threshold })
+
+    // スワイプ終了イベントを送信
+    config.onSwipeEnd?.(touchEnd.current.x, touchEnd.current.y, deltaX, deltaY)
 
     // 横スワイプ
     if (deltaX > 0) {
