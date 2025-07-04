@@ -88,7 +88,7 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
     document.body.classList.remove('mobile-dragging')
     
     // 全てのドラッグオーバークラスを削除
-    const allListWrappers = document.querySelectorAll('.list-wrapper')
+    const allListWrappers = document.querySelectorAll('.list-wrapper-mobile')
     allListWrappers.forEach(wrapper => {
       wrapper.classList.remove('drag-over')
     })
@@ -103,6 +103,9 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
       debugLog('Touch start ignored', { isEditingTitle, isDragging })
       return
     }
+    
+    // イベント伝播を停止してBoardViewMobileのタッチイベントと競合しないようにする
+    e.stopPropagation()
     
     const touch = e.touches[0]
     touchStartPos.current = { x: touch.clientX, y: touch.clientY }
@@ -125,6 +128,9 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
       debugLog('Touch move ignored - no start position')
       return
     }
+    
+    // イベント伝播を停止
+    e.stopPropagation()
     
     const touch = e.touches[0]
     const deltaX = Math.abs(touch.clientX - touchStartPos.current.x)
@@ -149,7 +155,7 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
       
       // ドラッグ中の他のリストにドラッグオーバー効果を適用
       const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
-      const allListWrappers = document.querySelectorAll('.list-wrapper')
+      const allListWrappers = document.querySelectorAll('.list-wrapper-mobile')
       
       // 既存のドラッグオーバークラスを削除
       allListWrappers.forEach(wrapper => {
@@ -158,8 +164,8 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
       
       // 現在の位置にあるリストラッパーにドラッグオーバー効果を適用
       if (elementBelow) {
-        const targetListWrapper = elementBelow.closest('.list-wrapper')
-        if (targetListWrapper && targetListWrapper !== elementBelow.closest(`[data-list-id="${list.id}"]`)?.closest('.list-wrapper')) {
+        const targetListWrapper = elementBelow.closest('.list-wrapper-mobile')
+        if (targetListWrapper && targetListWrapper !== elementBelow.closest(`[data-list-id="${list.id}"]`)?.closest('.list-wrapper-mobile')) {
           targetListWrapper.classList.add('drag-over')
         }
       }
@@ -168,6 +174,9 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     debugLog('Touch end', { isDragging, hasTimer: !!longPressTimer.current })
+    
+    // イベント伝播を停止
+    e.stopPropagation()
     
     // 長押しタイマーをクリア
     if (longPressTimer.current) {
@@ -182,9 +191,9 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
       const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
       
       if (elementBelow) {
-        const targetListWrapper = elementBelow.closest('.list-wrapper')
+        const targetListWrapper = elementBelow.closest('.list-wrapper-mobile')
         if (targetListWrapper) {
-          const allWrappers = Array.from(document.querySelectorAll('.list-wrapper'))
+          const allWrappers = Array.from(document.querySelectorAll('.list-wrapper-mobile'))
           const dropIndex = allWrappers.indexOf(targetListWrapper)
           const currentIndex = allWrappers.findIndex(wrapper => 
             wrapper.querySelector(`[data-list-id="${list.id}"]`)

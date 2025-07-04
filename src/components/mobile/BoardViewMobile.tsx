@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Card, List } from '../../types'
 import ListView from '../shared/ListView'
 import AddListForm from '../shared/common/AddListForm'
@@ -13,10 +13,6 @@ const BoardViewMobile: React.FC = () => {
   const [draggedListIndex, setDraggedListIndex] = useState<number>(-1)
   const [animatingListId, setAnimatingListId] = useState<string | null>(null)
   const [displacedListIds, setDisplacedListIds] = useState<string[]>([])
-  const [isDragging, setIsDragging] = useState(false)
-  
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null)
-  const touchStartPos = useRef<{ x: number; y: number } | null>(null)
   
   const { reorderLists, moveCard } = useBoardOperations()
 
@@ -28,7 +24,6 @@ const BoardViewMobile: React.FC = () => {
     setDraggedList(list)
     const listIndex = board.lists.findIndex(l => l.id === list.id)
     setDraggedListIndex(listIndex)
-    setIsDragging(true)
     
     // モバイルでドラッグ開始時にボディのスクロールを無効化
     document.body.classList.add('mobile-dragging')
@@ -43,7 +38,6 @@ const BoardViewMobile: React.FC = () => {
     setDraggedList(null)
     setDragOverIndex(-1)
     setDraggedListIndex(-1)
-    setIsDragging(false)
     
     // ボディのスクロールを再有効化
     document.body.classList.remove('mobile-dragging')
@@ -128,108 +122,10 @@ const BoardViewMobile: React.FC = () => {
     handleListDragEnd()
   }, [draggedList, board.lists, reorderLists, handleListDragEnd])
 
-  // タッチイベントハンドラー
-  const handleTouchStart = useCallback((e: React.TouchEvent, index: number) => {
-    const touch = e.touches[0]
-    touchStartPos.current = { x: touch.clientX, y: touch.clientY }
-    
-    // 長押しタイマー開始（600ms - リストは少し長めに設定）
-    longPressTimer.current = setTimeout(() => {
-      const list = board.lists[index]
-      if (list) {
-        handleListDragStart(e, list)
-      }
-    }, 600)
-  }, [board.lists, handleListDragStart])
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!touchStartPos.current) return
-    
-    const touch = e.touches[0]
-    const deltaX = Math.abs(touch.clientX - touchStartPos.current.x)
-    const deltaY = Math.abs(touch.clientY - touchStartPos.current.y)
-    
-    // 移動閾値（20px）
-    if (!isDragging && (deltaX > 20 || deltaY > 20)) {
-      if (longPressTimer.current) {
-        clearTimeout(longPressTimer.current)
-        longPressTimer.current = null
-      }
-    }
-    
-    // ドラッグ中はスクロールを防止
-    if (isDragging) {
-      e.preventDefault()
-      
-      // ドラッグ中の視覚的フィードバック
-      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
-      if (elementBelow) {
-        const listBelow = elementBelow.closest('.list-wrapper')
-        if (listBelow) {
-          const listIndex = Array.from(listBelow.parentElement?.children || []).indexOf(listBelow)
-          if (listIndex !== -1) {
-            setDragOverIndex(listIndex)
-          }
-        }
-      }
-    }
-  }, [isDragging])
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current)
-      longPressTimer.current = null
-    }
-    
-    if (isDragging) {
-      const touch = e.changedTouches[0]
-      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
-      
-      if (elementBelow) {
-        const targetList = elementBelow.closest('.list-wrapper')
-        if (targetList) {
-          const dropIndex = Array.from(targetList.parentElement?.children || []).indexOf(targetList)
-          if (dropIndex !== -1) {
-            // カスタムドロップイベントを作成
-            const dropEvent = new CustomEvent('drop', {
-              bubbles: true,
-              cancelable: true,
-              detail: {
-                dataTransfer: {
-                  types: ['text/list'],
-                  getData: (type: string) => {
-                    if (type === 'text/list') return draggedList?.id || ''
-                    return ''
-                  }
-                }
-              }
-            }) as any
-            
-            handleListDrop(dropEvent, dropIndex)
-          }
-        }
-      }
-    }
-    
-    touchStartPos.current = null
-  }, [isDragging, draggedList, handleListDrop])
-
-  const handleTouchCancel = useCallback(() => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current)
-      longPressTimer.current = null
-    }
-    touchStartPos.current = null
-    handleListDragEnd()
-  }, [handleListDragEnd])
-
   return (
     <div className="board-view-mobile">
       <div 
         className="lists-container-mobile"
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchCancel}
       >
         {board.lists.map((list, index) => {
           const isDraggedList = draggedListIndex === index
@@ -242,7 +138,6 @@ const BoardViewMobile: React.FC = () => {
             <div
               key={list.id}
               className={`list-wrapper-mobile ${isDraggedList ? 'dragging' : ''} ${isDragOver ? 'drag-over' : ''} ${isPlaceholder ? 'drag-placeholder' : ''} ${isAnimating ? 'dropped-animation' : ''} ${isDisplaced ? 'displaced-animation' : ''}`}
-              onTouchStart={(e) => handleTouchStart(e, index)}
               onDragOver={(e) => handleListDragOver(e, index)}
               onDragLeave={handleListDragLeave}
               onDrop={(e) => handleListDrop(e, index)}
