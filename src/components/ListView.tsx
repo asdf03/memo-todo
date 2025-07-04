@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { List, Card } from '../types'
 import ListHeader from './ListHeader'
 import CardContainer from './CardContainer'
@@ -15,22 +15,18 @@ interface ListViewProps {
 }
 
 const ListView: React.FC<ListViewProps> = ({ list, isAnimating = false, isDisplaced = false, onCardDrop, onListDragStart, onListDragEnd }) => {
-  const [isDragging, setIsDragging] = useState(false)
-
   const handleListDragStart = useCallback((e: React.DragEvent) => {
-    setIsDragging(true)
     onListDragStart?.(e, list)
   }, [list, onListDragStart])
 
   const handleListDragEnd = useCallback(() => {
-    setIsDragging(false)
     onListDragEnd?.()
   }, [onListDragEnd])
 
   return (
     <>
       <div 
-        className={`list-view ${isAnimating ? 'list-dropped-animation' : ''} ${isDisplaced ? 'list-displaced-animation' : ''} ${isDragging ? 'dragging' : ''}`}
+        className={`list-view ${isAnimating ? 'list-dropped-animation' : ''} ${isDisplaced ? 'list-displaced-animation' : ''}`}
         data-list-id={list.id}
       >
         <ListHeader 

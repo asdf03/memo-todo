@@ -187,6 +187,13 @@
   transition: all 0.2s ease;
 }
 
+/* リストヘッダーがドラッグ中の時、リスト全体にも効果を適用 */
+.list-header.dragging ~ .cards-container,
+.list-header.dragging ~ .list-actions {
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+
 /* リストヘッダーのタッチ操作 */
 .list-header {
   -webkit-user-select: none;
@@ -218,6 +225,14 @@
     transform: scale(0.9);
     background-color: rgba(0, 0, 0, 0.05);
     border-radius: 8px;
+  }
+  
+  /* リストヘッダーがドラッグ中の時、リスト全体にも効果を適用（モバイル） */
+  .list-header.dragging ~ .cards-container,
+  .list-header.dragging ~ .list-actions {
+    opacity: 0.6;
+    transform: scale(0.95);
+    transition: all 0.2s ease;
   }
   
   /* 長押し時のフィードバック */
