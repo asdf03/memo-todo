@@ -180,10 +180,24 @@
   transition: all 0.2s ease;
 }
 
-.list-view .cards-container:active {
-  background-color: rgba(0, 0, 0, 0.02);
+/* リストヘッダーのドラッグ中の状態 */
+.list-header.dragging {
+  opacity: 0.7;
+  transform: scale(0.95);
+  transition: all 0.2s ease;
 }
 
+/* リストヘッダーのタッチ操作 */
+.list-header {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* モバイル用のリストヘッダースタイル */
 @media (max-width: 768px) {
   .list-view {
     touch-action: manipulation;
@@ -195,25 +209,20 @@
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   }
   
-  .cards-container {
-    position: relative;
-    min-height: 50px;
+  .list-header {
+    touch-action: manipulation;
   }
   
-  .cards-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.02);
+  .list-header.dragging {
+    opacity: 0.6;
+    transform: scale(0.9);
+    background-color: rgba(0, 0, 0, 0.05);
     border-radius: 8px;
-    opacity: 0;
-    transition: opacity 0.2s ease;
   }
   
-  .cards-container:active::before {
-    opacity: 1;
+  /* 長押し時のフィードバック */
+  .list-header:active {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
   }
 }
