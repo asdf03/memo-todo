@@ -106,6 +106,7 @@ const CardContainer: React.FC<CardContainerProps> = ({ list, onCardDrop }) => {
   return (
     <div 
       className={`cards-container ${isDragOver ? 'drag-over' : ''}`}
+      data-list-id={list.id}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}

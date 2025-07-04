@@ -359,6 +359,17 @@
   font-weight: 500;
 }
 
+/* タッチドラッグ用スタイル */
+.touch-dragging {
+  cursor: grabbing;
+  transition: none !important;
+  pointer-events: none;
+}
+
+.touch-dragging * {
+  pointer-events: none;
+}
+
 /* モバイル対応 */
 @media (max-width: 768px) {
   .lists-container {

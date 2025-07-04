@@ -1,5 +1,7 @@
 import React, { useState, useEffect, memo, useCallback } from 'react'
 import { Card } from '../types'
+import { useTouchDrag } from '../hooks/useTouchDrag'
+import { useBoardOperations } from '../hooks/useBoardOperations'
 import './CardView.css'
 
 interface CardViewProps {
@@ -16,7 +18,8 @@ interface CardViewProps {
 
 const CardView: React.FC<CardViewProps> = memo(({ 
   card, 
-  cardIndex, 
+  cardIndex,
+  listId, 
   onDelete, 
   onUpdate, 
   onDragStart, 
@@ -27,6 +30,10 @@ const CardView: React.FC<CardViewProps> = memo(({
   const [isEditing, setIsEditing] = useState(false)
   const [titleInput, setTitleInput] = useState(card.title)
   const [descriptionInput, setDescriptionInput] = useState(card.description || '')
+  const [isDragMode, setIsDragMode] = useState(false)
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  
+  const { moveCard } = useBoardOperations()
   
   // cardが変更されたらinputも更新
   useEffect(() => {
@@ -66,6 +73,35 @@ const CardView: React.FC<CardViewProps> = memo(({
       onDelete()
     }
   }, [card.title, onDelete])
+
+  // タッチドラッグ機能
+  const touchDrag = useTouchDrag({
+    onDragStart: () => {
+      setIsDragMode(true)
+    },
+    onDragMove: (_, deltaX, deltaY) => {
+      setDragOffset({ x: deltaX, y: deltaY })
+    },
+    onDragEnd: (_, endX, endY) => {
+      // ドロップ位置の要素を取得
+      const elementBelow = document.elementFromPoint(endX, endY)
+      if (elementBelow) {
+        // リストコンテナを探す
+        const listContainer = elementBelow.closest('[data-list-id]')
+        if (listContainer) {
+          const targetListId = listContainer.getAttribute('data-list-id')
+          if (targetListId && targetListId !== listId) {
+            moveCard(card, targetListId)
+          }
+        }
+      }
+      
+      // リセット
+      setIsDragMode(false)
+      setDragOffset({ x: 0, y: 0 })
+    },
+    dragThreshold: 15
+  })
 
   const handleDragStart = useCallback((e: React.DragEvent) => {
     onDragStart?.(e, card, cardIndex)
@@ -111,12 +147,20 @@ const CardView: React.FC<CardViewProps> = memo(({
   return (
     <>
       <div 
-        className={`card-view ${isDragOver ? 'card-drag-over' : ''}`}
+        className={`card-view ${isDragOver ? 'card-drag-over' : ''} ${isDragMode ? 'touch-dragging' : ''}`}
         draggable={!isEditing}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onClick={handleCardClick}
+        onClick={isDragMode ? undefined : handleCardClick}
+        onTouchStart={touchDrag.onTouchStart}
+        onTouchMove={touchDrag.onTouchMove}
+        onTouchEnd={touchDrag.onTouchEnd}
+        style={{
+          transform: isDragMode ? `translate(${dragOffset.x}px, ${dragOffset.y}px)` : 'none',
+          zIndex: isDragMode ? 1000 : 'auto',
+          opacity: isDragMode ? 0.8 : 1
+        }}
       >
         <div className="card-content">
           <h4 className="card-title">
