@@ -6,9 +6,10 @@ interface ListHeaderProps {
   list: List
   onListDragStart?: (e: React.DragEvent, list: List) => void
   onListDragEnd?: () => void
+  onMobileMenu?: () => void
 }
 
-const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onListDragEnd }) => {
+const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onListDragEnd, onMobileMenu }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [titleInput, setTitleInput] = useState(list.title)
   const { updateListTitle, deleteList } = useBoardOperations()
@@ -80,10 +81,19 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onL
         </h3>
       )}
       <button 
-        className="delete-list-btn"
+        className="delete-list-btn desktop-only"
         onClick={handleDeleteClick}
       >
         ×
+      </button>
+      <button 
+        className="mobile-list-menu mobile-only"
+        onClick={(e) => {
+          e.stopPropagation()
+          onMobileMenu?.()
+        }}
+      >
+        ⋮
       </button>
     </div>
   )

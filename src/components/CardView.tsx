@@ -1,10 +1,13 @@
 import React, { useState, useEffect, memo, useCallback } from 'react'
 import { Card } from '../types'
+import MobileCardActions from './MobileCardActions'
+import MobileOverlay from './MobileOverlay'
 import './CardView.css'
 
 interface CardViewProps {
   card: Card
   cardIndex: number
+  listId: string
   onDelete: () => void
   onUpdate: (card: Partial<Card>) => void
   onDragStart?: (e: React.DragEvent, card: Card, cardIndex: number) => void
@@ -16,6 +19,7 @@ interface CardViewProps {
 const CardView: React.FC<CardViewProps> = memo(({ 
   card, 
   cardIndex, 
+  listId,
   onDelete, 
   onUpdate, 
   onDragStart, 
@@ -24,6 +28,7 @@ const CardView: React.FC<CardViewProps> = memo(({
   isDragOver 
 }) => {
   const [isEditing, setIsEditing] = useState(false)
+  const [showMobileActions, setShowMobileActions] = useState(false)
   const [titleInput, setTitleInput] = useState(card.title)
   const [descriptionInput, setDescriptionInput] = useState(card.description || '')
   
@@ -57,6 +62,27 @@ const CardView: React.FC<CardViewProps> = memo(({
       setIsEditing(true)
     }
   }, [isEditing])
+
+  const handleLongPress = useCallback(() => {
+    setShowMobileActions(true)
+  }, [])
+
+  // 長押し検出
+  const [pressTimer, setPressTimer] = useState<NodeJS.Timeout | null>(null)
+  
+  const handleTouchStart = useCallback(() => {
+    const timer = setTimeout(() => {
+      handleLongPress()
+    }, 500) // 500ms長押し
+    setPressTimer(timer)
+  }, [handleLongPress])
+
+  const handleTouchEnd = useCallback(() => {
+    if (pressTimer) {
+      clearTimeout(pressTimer)
+      setPressTimer(null)
+    }
+  }, [pressTimer])
 
   const handleDeleteClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
@@ -107,31 +133,56 @@ const CardView: React.FC<CardViewProps> = memo(({
   }
 
   return (
-    <div 
-      className={`card-view ${isDragOver ? 'card-drag-over' : ''}`}
-      draggable={!isEditing}
-      onDragStart={handleDragStart}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      onClick={handleCardClick}
-    >
-      <div className="card-content">
-        <h4 className="card-title">
-          {card.title}
-        </h4>
-        {card.description && (
-          <p className="card-description">
-            {card.description}
-          </p>
-        )}
-      </div>
-      <button 
-        className="delete-card-btn"
-        onClick={handleDeleteClick}
+    <>
+      <div 
+        className={`card-view ${isDragOver ? 'card-drag-over' : ''}`}
+        draggable={!isEditing}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        onClick={handleCardClick}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
       >
-        ×
-      </button>
-    </div>
+        <div className="card-content">
+          <h4 className="card-title">
+            {card.title}
+          </h4>
+          {card.description && (
+            <p className="card-description">
+              {card.description}
+            </p>
+          )}
+        </div>
+        <button 
+          className="delete-card-btn desktop-only"
+          onClick={handleDeleteClick}
+        >
+          ×
+        </button>
+        <button 
+          className="mobile-card-menu mobile-only"
+          onClick={(e) => {
+            e.stopPropagation()
+            setShowMobileActions(true)
+          }}
+        >
+          ⋮
+        </button>
+      </div>
+      
+      <MobileOverlay 
+        isOpen={showMobileActions} 
+        onClose={() => setShowMobileActions(false)}
+      >
+        <MobileCardActions 
+          card={card}
+          currentListId={listId}
+          onClose={() => setShowMobileActions(false)}
+        />
+      </MobileOverlay>
+    </>
   )
 })
 

@@ -115,6 +115,7 @@ const CardContainer: React.FC<CardContainerProps> = ({ list, onCardDrop }) => {
           key={card.id}
           card={card}
           cardIndex={cardIndex}
+          listId={list.id}
           isDragOver={cardDragOverIndex === cardIndex}
           onDelete={() => handleDeleteCard(card.id)}
           onUpdate={(updatedCard) => handleUpdateCard(card.id, updatedCard)}
