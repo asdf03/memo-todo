@@ -364,10 +364,22 @@
   cursor: grabbing;
   transition: none !important;
   pointer-events: none;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
 }
 
 .touch-dragging * {
   pointer-events: none;
+}
+
+/* 長押し中のビジュアルフィードバック */
+@keyframes longPressHighlight {
+  0% { background-color: transparent; }
+  100% { background-color: rgba(99, 102, 241, 0.1); }
+}
+
+.card-view:active,
+.list-drag-handle:active {
+  animation: longPressHighlight 0.5s ease-out;
 }
 
 /* リストドラッグハンドル */

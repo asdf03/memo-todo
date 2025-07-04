@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { List, Card } from '../types'
 import CardView from './CardView'
 import { useBoardOperations } from '../hooks/useBoardOperations'
@@ -12,8 +12,25 @@ const CardContainer: React.FC<CardContainerProps> = ({ list, onCardDrop }) => {
   const [isDragOver, setIsDragOver] = useState(false)
   const [cardDragOverIndex, setCardDragOverIndex] = useState<number>(-1)
   const [, setDraggedCard] = useState<Card | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   
   const { deleteCard, updateCard, reorderCards } = useBoardOperations()
+
+  // タッチドロップイベントをリッスン
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const handleTouchDrop = (event: any) => {
+      const { fakeDropEvent } = event.detail
+      handleDrop(fakeDropEvent)
+    }
+
+    container.addEventListener('touch-drop', handleTouchDrop)
+    return () => {
+      container.removeEventListener('touch-drop', handleTouchDrop)
+    }
+  }, [list.id])
 
   const handleDeleteCard = async (cardId: string) => {
     await deleteCard(list.id, cardId)
@@ -105,6 +122,7 @@ const CardContainer: React.FC<CardContainerProps> = ({ list, onCardDrop }) => {
 
   return (
     <div 
+      ref={containerRef}
       className={`cards-container ${isDragOver ? 'drag-over' : ''}`}
       data-list-id={list.id}
       onDragOver={handleDragOver}

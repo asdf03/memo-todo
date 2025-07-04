@@ -1,7 +1,6 @@
 import React, { useState, useEffect, memo, useCallback } from 'react'
 import { Card } from '../types'
-import { useTouchDrag } from '../hooks/useTouchDrag'
-import { useBoardOperations } from '../hooks/useBoardOperations'
+import { useLongPressDrag } from '../hooks/useLongPressDrag'
 import './CardView.css'
 
 interface CardViewProps {
@@ -18,8 +17,7 @@ interface CardViewProps {
 
 const CardView: React.FC<CardViewProps> = memo(({ 
   card, 
-  cardIndex,
-  listId, 
+  cardIndex, 
   onDelete, 
   onUpdate, 
   onDragStart, 
@@ -30,10 +28,8 @@ const CardView: React.FC<CardViewProps> = memo(({
   const [isEditing, setIsEditing] = useState(false)
   const [titleInput, setTitleInput] = useState(card.title)
   const [descriptionInput, setDescriptionInput] = useState(card.description || '')
-  const [isDragMode, setIsDragMode] = useState(false)
+  const [isTouchDragging, setIsTouchDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-  
-  const { moveCard } = useBoardOperations()
   
   // cardが変更されたらinputも更新
   useEffect(() => {
@@ -74,33 +70,79 @@ const CardView: React.FC<CardViewProps> = memo(({
     }
   }, [card.title, onDelete])
 
-  // タッチドラッグ機能
-  const touchDrag = useTouchDrag({
+  // 長押し後ドラッグ機能
+  const longPressDrag = useLongPressDrag({
     onDragStart: () => {
-      setIsDragMode(true)
+      setIsTouchDragging(true)
+      
+      // PC版と同じようにDragEventをシミュレート
+      const fakeEvent = {
+        dataTransfer: {
+          setData: (type: string, data: string) => {
+            // データをグローバルに保存
+            (window as any).__dragData = (window as any).__dragData || {}
+            ;(window as any).__dragData[type] = data
+          },
+          types: ['application/json', 'text/card']
+        }
+      } as any
+      
+      onDragStart?.(fakeEvent, card, cardIndex)
     },
     onDragMove: (_, deltaX, deltaY) => {
       setDragOffset({ x: deltaX, y: deltaY })
     },
     onDragEnd: (_, endX, endY) => {
-      // ドロップ位置の要素を取得
+      // PC版と同じドロップ処理
       const elementBelow = document.elementFromPoint(endX, endY)
+      
       if (elementBelow) {
-        // リストコンテナを探す
-        const listContainer = elementBelow.closest('[data-list-id]')
-        if (listContainer) {
-          const targetListId = listContainer.getAttribute('data-list-id')
-          if (targetListId && targetListId !== listId) {
-            moveCard(card, targetListId)
+        // カードのドロップイベントをシミュレート
+        const cardElement = elementBelow.closest('.card-view')
+        if (cardElement) {
+          const fakeDropEvent = {
+            preventDefault: () => {},
+            stopPropagation: () => {},
+            dataTransfer: {
+              getData: (type: string) => {
+                return (window as any).__dragData?.[type] || ''
+              },
+              types: ['application/json', 'text/card']
+            }
+          } as any
+          
+          const cardIndex = parseInt(cardElement.getAttribute('data-card-index') || '0')
+          onDrop?.(fakeDropEvent, cardIndex)
+        }
+        // リストコンテナへのドロップ
+        else {
+          const listContainer = elementBelow.closest('.cards-container')
+          if (listContainer) {
+            const fakeDropEvent = {
+              preventDefault: () => {},
+              stopPropagation: () => {},
+              dataTransfer: {
+                getData: (type: string) => {
+                  return (window as any).__dragData?.[type] || ''
+                },
+                types: ['application/json', 'text/card']
+              }
+            } as any
+            
+            // リストのドロップイベントを発火
+            listContainer.dispatchEvent(new CustomEvent('touch-drop', {
+              detail: { fakeDropEvent }
+            }))
           }
         }
       }
       
       // リセット
-      setIsDragMode(false)
+      setIsTouchDragging(false)
       setDragOffset({ x: 0, y: 0 })
+      delete (window as any).__dragData
     },
-    dragThreshold: 15
+    longPressDelay: 500
   })
 
   const handleDragStart = useCallback((e: React.DragEvent) => {
@@ -147,19 +189,21 @@ const CardView: React.FC<CardViewProps> = memo(({
   return (
     <>
       <div 
-        className={`card-view ${isDragOver ? 'card-drag-over' : ''} ${isDragMode ? 'touch-dragging' : ''}`}
+        className={`card-view ${isDragOver ? 'card-drag-over' : ''} ${isTouchDragging ? 'touch-dragging' : ''}`}
         draggable={!isEditing}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onClick={isDragMode ? undefined : handleCardClick}
-        onTouchStart={touchDrag.onTouchStart}
-        onTouchMove={touchDrag.onTouchMove}
-        onTouchEnd={touchDrag.onTouchEnd}
+        onClick={isTouchDragging ? undefined : handleCardClick}
+        onTouchStart={longPressDrag.onTouchStart}
+        onTouchMove={longPressDrag.onTouchMove}
+        onTouchEnd={longPressDrag.onTouchEnd}
+        onTouchCancel={longPressDrag.onTouchCancel}
+        data-card-index={cardIndex}
         style={{
-          transform: isDragMode ? `translate(${dragOffset.x}px, ${dragOffset.y}px)` : 'none',
-          zIndex: isDragMode ? 1000 : 'auto',
-          opacity: isDragMode ? 0.8 : 1
+          transform: isTouchDragging ? `translate(${dragOffset.x}px, ${dragOffset.y}px)` : 'none',
+          zIndex: isTouchDragging ? 1000 : 'auto',
+          opacity: isTouchDragging ? 0.8 : 1
         }}
       >
         <div className="card-content">
