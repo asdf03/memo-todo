@@ -1,73 +1,81 @@
 import { useState, useEffect } from 'react'
 
-interface DeviceInfo {
-  type: 'mobile' | 'tablet' | 'desktop'
+export interface DeviceInfo {
   isMobile: boolean
   isTablet: boolean
   isDesktop: boolean
   isTouchDevice: boolean
-  screenWidth: number
-  screenHeight: number
-  userAgent: string
+  type: 'mobile' | 'tablet' | 'desktop'
 }
 
-export const useDeviceDetection = (): DeviceInfo => {
+export const useDeviceDetection = () => {
   const [deviceInfo, setDeviceInfo] = useState<DeviceInfo>({
-    type: 'desktop',
     isMobile: false,
     isTablet: false,
     isDesktop: true,
     isTouchDevice: false,
-    screenWidth: 0,
-    screenHeight: 0,
-    userAgent: ''
+    type: 'desktop'
   })
 
   useEffect(() => {
     const detectDevice = () => {
+      // タッチデバイスの検出を改善
+      const isTouchDevice = 
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0 ||
+        // @ts-ignore
+        navigator.msMaxTouchPoints > 0
+
+      // ユーザーエージェントによる判定
       const userAgent = navigator.userAgent.toLowerCase()
+      const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent)
+      const isTabletUA = /ipad|android(?!.*mobile)|tablet/i.test(userAgent)
+      
+      // 画面サイズによる判定
       const screenWidth = window.innerWidth
       const screenHeight = window.innerHeight
-      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
-
-      // モバイルデバイスの判定
-      const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent)
-      const isSmallScreen = screenWidth < 768
-
-      // タブレットの判定
-      const isTabletUA = /ipad|android(?!.*mobile)/i.test(userAgent)
-      const isTabletScreen = screenWidth >= 768 && screenWidth < 1024
-
-      let deviceType: 'mobile' | 'tablet' | 'desktop'
+      const isMobileScreen = screenWidth <= 768
+      const isTabletScreen = screenWidth > 768 && screenWidth <= 1024
       
-      if (isMobileUA || isSmallScreen) {
-        deviceType = 'mobile'
-      } else if (isTabletUA || isTabletScreen) {
-        deviceType = 'tablet'
-      } else {
-        deviceType = 'desktop'
+      // 総合的な判定
+      const isMobile = (isMobileUA || (isTouchDevice && isMobileScreen)) && !isTabletUA
+      const isTablet = isTabletUA || (isTouchDevice && isTabletScreen)
+      const isDesktop = !isMobile && !isTablet
+      
+      let type: 'mobile' | 'tablet' | 'desktop' = 'desktop'
+      if (isMobile) type = 'mobile'
+      else if (isTablet) type = 'tablet'
+      
+      const newDeviceInfo: DeviceInfo = {
+        isMobile,
+        isTablet,
+        isDesktop,
+        isTouchDevice,
+        type
       }
-
-      setDeviceInfo({
-        type: deviceType,
-        isMobile: deviceType === 'mobile',
-        isTablet: deviceType === 'tablet',
-        isDesktop: deviceType === 'desktop',
-        isTouchDevice: hasTouch,
+      
+      // デバッグ情報
+      console.log('[DeviceDetection] Device info:', {
+        userAgent,
         screenWidth,
         screenHeight,
-        userAgent: navigator.userAgent
+        isTouchDevice,
+        isMobileUA,
+        isTabletUA,
+        result: newDeviceInfo
       })
+      
+      setDeviceInfo(newDeviceInfo)
     }
 
-    // 初回実行
+    // 初回検出
     detectDevice()
-    
-    // リサイズイベントリスナー
+
+    // リサイズイベントでの再検出
     const handleResize = () => {
       detectDevice()
     }
-    
+
     window.addEventListener('resize', handleResize)
     
     return () => {

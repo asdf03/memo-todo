@@ -96,8 +96,15 @@ const CardView: React.FC<CardViewProps> = memo(({
     const touch = e.touches[0]
     touchStartPos.current = { x: touch.clientX, y: touch.clientY }
     
-    // 長押しタイマー開始
+    // 長押しタイマー開始（400msに短縮）
     longPressTimer.current = setTimeout(() => {
+      setIsDragging(true)
+      
+      // ハプティックフィードバック
+      if (navigator.vibrate) {
+        navigator.vibrate(50)
+      }
+      
       // PC版のドラッグイベントをシミュレート
       const fakeEvent = {
         dataTransfer: {
@@ -108,9 +115,9 @@ const CardView: React.FC<CardViewProps> = memo(({
         stopPropagation: () => {}
       } as React.DragEvent
       
-      handleDragStart(fakeEvent)
-    }, 500)
-  }, [isEditing, handleDragStart])
+      onDragStart?.(fakeEvent, card, cardIndex)
+    }, 400) // 400msに短縮
+  }, [isEditing, card, cardIndex, onDragStart])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!touchStartPos.current) return
@@ -119,26 +126,91 @@ const CardView: React.FC<CardViewProps> = memo(({
     const deltaX = Math.abs(touch.clientX - touchStartPos.current.x)
     const deltaY = Math.abs(touch.clientY - touchStartPos.current.y)
     
-    // 一定以上移動したら長押し取消
-    if (deltaX > 10 || deltaY > 10) {
+    // 移動閾値を緩くする（10px → 15px）
+    if (!isDragging && (deltaX > 15 || deltaY > 15)) {
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current)
         longPressTimer.current = null
       }
     }
-  }, [])
+    
+    // ドラッグ中はスクロールを防止
+    if (isDragging) {
+      e.preventDefault()
+      
+      // ドラッグ中の視覚的フィードバック
+      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
+      if (elementBelow) {
+        const cardBelow = elementBelow.closest('.card-view')
+        if (cardBelow && cardBelow !== e.currentTarget) {
+          // 他のカードにドラッグオーバー効果を適用
+          const allCards = document.querySelectorAll('.card-view')
+          allCards.forEach(card => card.classList.remove('card-drag-over'))
+          cardBelow.classList.add('card-drag-over')
+        }
+      }
+    }
+  }, [isDragging])
 
-  const handleTouchEnd = useCallback(() => {
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current)
       longPressTimer.current = null
     }
-    touchStartPos.current = null
     
     if (isDragging) {
-      handleDragEnd()
+      const touch = e.changedTouches[0]
+      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
+      
+      if (elementBelow) {
+        const cardBelow = elementBelow.closest('.card-view')
+        if (cardBelow) {
+          // ドロップイベントをシミュレート
+          const dropEvent = new CustomEvent('drop', {
+            bubbles: true,
+            cancelable: true,
+            detail: {
+              card: card,
+              cardIndex: cardIndex
+            }
+          })
+          
+          // dataTransferプロパティを設定
+          Object.defineProperty(dropEvent, 'dataTransfer', {
+            value: {
+              getData: (type: string) => {
+                if (type === 'text/card') return card.id
+                if (type === 'application/json') return JSON.stringify(card)
+                return ''
+              }
+            },
+            writable: false
+          })
+          
+          // preventDefault メソッドを追加
+          Object.defineProperty(dropEvent, 'preventDefault', {
+            value: () => {},
+            writable: false
+          })
+          
+          cardBelow.dispatchEvent(dropEvent)
+          
+          // 成功フィードバック
+          if (navigator.vibrate) {
+            navigator.vibrate([30, 50, 30])
+          }
+        }
+      }
+      
+      // ドラッグオーバー効果を削除
+      const allCards = document.querySelectorAll('.card-view')
+      allCards.forEach(card => card.classList.remove('card-drag-over'))
+      
+      setIsDragging(false)
     }
-  }, [isDragging, handleDragEnd])
+    
+    touchStartPos.current = null
+  }, [isDragging, card, cardIndex])
 
   const handleTouchCancel = useCallback(() => {
     if (longPressTimer.current) {

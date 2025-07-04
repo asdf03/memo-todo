@@ -197,6 +197,8 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
             
             // カスタムドロップイベントを作成してディスパッチ
             const dropEvent = new CustomEvent('drop', {
+              bubbles: true,
+              cancelable: true,
               detail: {
                 listId: list.id,
                 dropIndex: dropIndex,
@@ -209,16 +211,26 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
                   }
                 }
               }
-            }) as any
+            })
             
-            dropEvent.dataTransfer = {
-              types: ['text/list'],
-              getData: (type: string) => {
-                if (type === 'text/list') return list.id
-                if (type === 'application/json') return JSON.stringify(list)
-                return ''
-              }
-            }
+            // dataTransferプロパティを直接設定
+            Object.defineProperty(dropEvent, 'dataTransfer', {
+              value: {
+                types: ['text/list'],
+                getData: (type: string) => {
+                  if (type === 'text/list') return list.id
+                  if (type === 'application/json') return JSON.stringify(list)
+                  return ''
+                }
+              },
+              writable: false
+            })
+            
+            // preventDefault メソッドを追加
+            Object.defineProperty(dropEvent, 'preventDefault', {
+              value: () => {},
+              writable: false
+            })
             
             targetListWrapper.dispatchEvent(dropEvent)
             
