@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react'
+import React, { useState, useCallback } from 'react'
 import { useBoardOperations } from '../../hooks/useBoardOperations'
 import './styles/ListActionsDesktop.css'
 
@@ -11,105 +11,43 @@ const ListActionsDesktop: React.FC<ListActionsDesktopProps> = ({ listId }) => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const buttonRef = useRef<HTMLButtonElement>(null)
-  const [validationError, setValidationError] = useState('')
   
   const { addCard } = useBoardOperations()
 
-  const handleShowForm = useCallback(() => {
-    setIsFormVisible(true)
-    // デスクトップでは即座にフォーカス
-    setTimeout(() => {
-      inputRef.current?.focus()
-    }, 0)
-  }, [])
-
-  const handleHideForm = useCallback(() => {
-    setIsFormVisible(false)
-    setTitle('')
-    setDescription('')
-    // フォームを閉じた後、ボタンにフォーカスを戻す
-    setTimeout(() => {
-      buttonRef.current?.focus()
-    }, 0)
-  }, [])
-
   const handleSave = useCallback(async () => {
-    if (!title.trim()) {
-      setValidationError('タイトルを入力してください')
-      return
-    }
-
-    setIsLoading(true)
-    setValidationError('')
-
+    if (!title.trim() || isLoading) return
+    
     try {
+      setIsLoading(true)
       await addCard(listId, title.trim())
       setTitle('')
       setDescription('')
       setIsFormVisible(false)
-      setValidationError('')
     } catch (error) {
-      console.error('カードの追加エラー:', error)
-      setValidationError('カードの追加に失敗しました')
+      console.error('カード追加エラー:', error)
     } finally {
       setIsLoading(false)
     }
-  }, [listId, title, addCard])
+  }, [listId, title, addCard, isLoading])
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && e.ctrlKey) {
-      e.preventDefault()
-      handleSave()
-    } else if (e.key === 'Escape') {
-      e.preventDefault()
-      handleHideForm()
-    } else if (e.key === 'Tab' && e.target === inputRef.current) {
-      // Tabキーでテキストエリアにフォーカス移動
-      e.preventDefault()
-      textareaRef.current?.focus()
-    }
-  }, [handleSave, handleHideForm])
-
-  // フォーム外クリックで閉じる
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (isFormVisible && inputRef.current && !inputRef.current.contains(e.target as Node)) {
-        const formContainer = inputRef.current.closest('.add-card-form-desktop')
-        if (formContainer && !formContainer.contains(e.target as Node)) {
-          handleHideForm()
-        }
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [isFormVisible, handleHideForm])
-
-  // テキストエリアの自動リサイズ
-  const handleTextareaChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setDescription(e.target.value)
-    
-    // 自動リサイズ
-    const textarea = e.target
-    textarea.style.height = 'auto'
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`
+  const handleCancel = useCallback(() => {
+    setTitle('')
+    setDescription('')
+    setIsFormVisible(false)
   }, [])
+
+  const handleShowForm = useCallback(() => {
+    setIsFormVisible(true)
+  }, [])
+
+  // フォーム外クリックで閉じる（必要なら後で再実装）
 
   if (!isFormVisible) {
     return (
-      <div className="add-card-button-container-desktop">
+      <div className="add-card-container-desktop">
         <button
-          ref={buttonRef}
-          className={`add-card-button-desktop ${isHovered ? 'hovered' : ''}`}
+          className="add-card-button-desktop"
           onClick={handleShowForm}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          aria-label="新しいカードを追加"
-          title="新しいカードを追加"
         >
           <span className="add-icon-desktop">+</span>
           <span className="add-text-desktop">カードを追加</span>
@@ -119,70 +57,42 @@ const ListActionsDesktop: React.FC<ListActionsDesktopProps> = ({ listId }) => {
   }
 
   return (
-    <div className="add-card-form-container-desktop">
-      <div className="add-card-form-desktop">
-        <div className="form-header-desktop">
-          <h3>新しいカード</h3>
-          <div className="keyboard-hint-desktop">
-            <kbd>Ctrl</kbd> + <kbd>Enter</kbd> 保存 / <kbd>Esc</kbd> キャンセル / <kbd>Tab</kbd> 次の項目
-          </div>
-        </div>
+    <div className="add-card-form-desktop">
+      <div className="form-content-desktop">
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="カードのタイトルを入力..."
+          className="card-title-input-desktop"
+          disabled={isLoading}
+          maxLength={200}
+          autoFocus
+        />
         
-        <div className="form-body-desktop">
-          <input
-            ref={inputRef}
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="カードのタイトル..."
-            className="title-input-desktop"
-            disabled={isLoading}
-            maxLength={200}
-            autoComplete="off"
-          />
-          
-          <textarea
-            ref={textareaRef}
-            value={description}
-            onChange={handleTextareaChange}
-            onKeyDown={handleKeyDown}
-            placeholder="説明（オプション）... Shift+Enterで改行"
-            className="description-input-desktop"
-            disabled={isLoading}
-            maxLength={1000}
-            rows={3}
-          />
-          
-          <div className="input-footer-desktop">
-            <div className="character-count-desktop">
-              タイトル: {title.length}/200 | 説明: {description.length}/1000
-            </div>
-            <div className="validation-message-desktop">
-              {validationError}
-            </div>
-          </div>
-        </div>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="説明（オプション）..."
+          className="card-description-input-desktop"
+          disabled={isLoading}
+          maxLength={500}
+          rows={3}
+        />
         
         <div className="form-actions-desktop">
           <button
             onClick={handleSave}
             disabled={!title.trim() || isLoading}
             className="save-button-desktop"
-            aria-label="カードを保存 (Ctrl+Enter)"
           >
-            {isLoading ? (
-              <span className="loading-spinner-desktop"></span>
-            ) : (
-              '保存'
-            )}
+            {isLoading ? '保存中...' : '保存'}
           </button>
           
           <button
-            onClick={handleHideForm}
+            onClick={handleCancel}
             disabled={isLoading}
             className="cancel-button-desktop"
-            aria-label="キャンセル (Esc)"
           >
             キャンセル
           </button>

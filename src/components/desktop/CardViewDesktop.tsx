@@ -83,14 +83,9 @@ const CardViewDesktop: React.FC<CardViewDesktopProps> = memo(({
     onDrop(e, cardIndex)
   }, [onDrop, cardIndex])
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (isEditing) return
-    
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      setIsEditing(true)
-    }
-  }, [isEditing])
+  const handleDoubleClick = useCallback(() => {
+    setIsEditing(true)
+  }, [])
 
   if (isEditing) {
     return (
@@ -101,13 +96,6 @@ const CardViewDesktop: React.FC<CardViewDesktopProps> = memo(({
           onChange={(e) => setTitleInput(e.target.value)}
           placeholder="カードのタイトル"
           autoFocus
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleSave()
-            } else if (e.key === 'Escape') {
-              handleCancel()
-            }
-          }}
         />
         <textarea
           className="card-description-input-desktop"
@@ -115,11 +103,6 @@ const CardViewDesktop: React.FC<CardViewDesktopProps> = memo(({
           onChange={(e) => setDescriptionInput(e.target.value)}
           placeholder="説明（オプション）"
           rows={3}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') {
-              handleCancel()
-            }
-          }}
         />
         <div className="card-edit-actions-desktop">
           <button className="save-btn-desktop" onClick={handleSave}>
@@ -142,7 +125,6 @@ const CardViewDesktop: React.FC<CardViewDesktopProps> = memo(({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       onClick={handleCardClick}
-      onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
       aria-label={`カード: ${card.title}`}
@@ -157,12 +139,14 @@ const CardViewDesktop: React.FC<CardViewDesktopProps> = memo(({
             {card.description}
           </p>
         )}
+        <div className="card-content-text-desktop" onDoubleClick={handleDoubleClick}>
+          {card.description}
+        </div>
       </div>
       <button 
         className="delete-card-btn-desktop"
         onClick={handleDeleteClick}
         aria-label="カードを削除"
-        title="カードを削除"
       >
         ×
       </button>

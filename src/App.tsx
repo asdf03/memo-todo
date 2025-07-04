@@ -7,6 +7,8 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { BoardProvider } from './context/BoardContext'
 import { BoardAPI } from './lib/boardApi'
 import './App.css'
+import './components/mobile/styles/mobile.css'
+import './components/desktop/styles/desktop.css'
 
 const AppContent: React.FC = () => {
   const { user, loading, signOut } = useAuth()
@@ -83,6 +85,7 @@ const AppContent: React.FC = () => {
     }
   }, [user?.id]) // userの代わりにuser.idを使用
 
+
   if (loading || boardLoading) {
     return (
       <div className="app">
@@ -151,18 +154,17 @@ const AppContent: React.FC = () => {
             </div>
             <button 
               className="header-btn" 
-              onClick={refreshBoard} 
-              title="更新"
+              onClick={refreshBoard}
             >
               🔄
             </button>
-            <button className="header-btn" title="設定">
+            <button className="header-btn">
               ⚙️
             </button>
-            <button className="header-btn" title="ヘルプ">
+            <button className="header-btn">
               ❓
             </button>
-            <button className="header-btn" onClick={handleSignOut} title="ログアウト">
+            <button className="header-btn" onClick={handleSignOut}>
               🚪
             </button>
           </div>

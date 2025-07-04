@@ -25,10 +25,10 @@ const AddListFormMobile: React.FC = () => {
   }, [])
 
   const handleSave = useCallback(async () => {
-    if (!title.trim()) return
+    if (!title.trim() || isLoading) return
     
-    setIsLoading(true)
     try {
+      setIsLoading(true)
       await addList(title.trim())
       setTitle('')
       setIsFormVisible(false)
@@ -46,17 +46,12 @@ const AddListFormMobile: React.FC = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [title, addList])
+  }, [title, addList, isLoading])
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleSave()
-    } else if (e.key === 'Escape') {
-      e.preventDefault()
-      handleHideForm()
-    }
-  }, [handleSave, handleHideForm])
+  const handleCancel = useCallback(() => {
+    setTitle('')
+    setIsFormVisible(false)
+  }, [])
 
   // スワイプジェスチャーでフォームを閉じる
   const handleTouchStart = useRef<{ x: number; y: number } | null>(null)
@@ -115,15 +110,15 @@ const AddListFormMobile: React.FC = () => {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="リストのタイトルを入力..."
-            className="title-input-mobile"
+            placeholder="リスト名を入力"
+            className="add-list-input-mobile"
             disabled={isLoading}
-            maxLength={100}
+            maxLength={50}
+            autoFocus
           />
           
           <div className="character-count-mobile">
-            {title.length}/100
+            {title.length}/50
           </div>
         </div>
         
@@ -142,7 +137,7 @@ const AddListFormMobile: React.FC = () => {
           </button>
           
           <button
-            onClick={handleHideForm}
+            onClick={handleCancel}
             disabled={isLoading}
             className="cancel-button-mobile"
             aria-label="キャンセル"

@@ -30,51 +30,19 @@ const AddListFormDesktop: React.FC = () => {
   }, [])
 
   const handleSave = useCallback(async () => {
-    if (!title.trim()) return
+    if (!title.trim() || isLoading) return
     
-    setIsLoading(true)
     try {
+      setIsLoading(true)
       await addList(title.trim())
       setTitle('')
-      setIsFormVisible(false)
-      
-      // 成功後、ボタンにフォーカスを戻す
-      setTimeout(() => {
-        buttonRef.current?.focus()
-      }, 0)
+      handleHideForm()
     } catch (error) {
-      console.error('リスト追加エラー:', error)
-      // エラー時はフォームを維持し、入力フィールドにフォーカス
-      inputRef.current?.focus()
+      console.error('リスト作成エラー:', error)
     } finally {
       setIsLoading(false)
     }
   }, [title, addList])
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleSave()
-    } else if (e.key === 'Escape') {
-      e.preventDefault()
-      handleHideForm()
-    }
-  }, [handleSave, handleHideForm])
-
-  // グローバルキーボードショートカット
-  useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
-        e.preventDefault()
-        if (!isFormVisible) {
-          handleShowForm()
-        }
-      }
-    }
-
-    window.addEventListener('keydown', handleGlobalKeyDown)
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown)
-  }, [isFormVisible, handleShowForm])
 
   // フォーム外クリックで閉じる
   useEffect(() => {
@@ -100,8 +68,6 @@ const AddListFormDesktop: React.FC = () => {
           onClick={handleShowForm}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          aria-label="新しいリストを追加 (Ctrl+N)"
-          title="新しいリストを追加 (Ctrl+N)"
         >
           <span className="add-icon-desktop">+</span>
           <span className="add-text-desktop">リストを追加</span>
@@ -115,9 +81,6 @@ const AddListFormDesktop: React.FC = () => {
       <div className="add-list-form-desktop">
         <div className="form-header-desktop">
           <h3>新しいリスト</h3>
-          <div className="keyboard-hint-desktop">
-            <kbd>Enter</kbd> 保存 / <kbd>Esc</kbd> キャンセル
-          </div>
         </div>
         
         <div className="form-body-desktop">
@@ -126,7 +89,6 @@ const AddListFormDesktop: React.FC = () => {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={handleKeyDown}
             placeholder="リストのタイトルを入力..."
             className="title-input-desktop"
             disabled={isLoading}
@@ -150,7 +112,6 @@ const AddListFormDesktop: React.FC = () => {
             onClick={handleSave}
             disabled={!title.trim() || isLoading}
             className="save-button-desktop"
-            aria-label="リストを保存 (Enter)"
           >
             {isLoading ? (
               <span className="loading-spinner-desktop"></span>
@@ -163,7 +124,6 @@ const AddListFormDesktop: React.FC = () => {
             onClick={handleHideForm}
             disabled={isLoading}
             className="cancel-button-desktop"
-            aria-label="キャンセル (Esc)"
           >
             キャンセル
           </button>

@@ -53,7 +53,6 @@ const BoardTitle: React.FC = memo(() => {
     <h1 
       className="board-title" 
       onClick={() => setIsEditing(true)}
-      title="クリックで編集"
     >
       {board.title}
     </h1>

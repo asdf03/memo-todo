@@ -76,28 +76,6 @@
   color: #212529;
 }
 
-.keyboard-hint-desktop {
-  font-size: 10px;
-  color: #6c757d;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  flex-wrap: wrap;
-  max-width: 150px;
-  line-height: 1.2;
-}
-
-.keyboard-hint-desktop kbd {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 2px;
-  padding: 1px 3px;
-  font-size: 9px;
-  font-family: monospace;
-  min-width: 12px;
-  text-align: center;
-}
-
 .form-body-desktop {
   margin-bottom: 10px;
 }

@@ -19,9 +19,6 @@ interface CardViewProps {
 const CardView: React.FC<CardViewProps> = (props) => {
   const deviceInfo = useDeviceDetection()
   
-  // デバッグ用ログ
-  console.log('[CardView] Device info:', deviceInfo)
-  console.log('[CardView] Using component:', deviceInfo.isMobile ? 'Mobile' : 'Desktop')
   
   // モバイルまたはタブレットの場合はモバイル版を使用
   if (deviceInfo.isMobile || deviceInfo.isTablet) {

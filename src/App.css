@@ -1,11 +1,80 @@
+/* アプリケーション基本レイアウト - デバイス非依存 */
 .app {
   width: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #f8fafc 100%);
-  background-size: 400% 400%;
-  animation: gradientShift 45s ease infinite;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.app-main {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ヘッダーコンテナ - プラットフォーム固有のスタイルは各自が設定 */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.app-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.app-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.app-header h1 {
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+}
+
+.user-avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.user-name {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-btn {
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
 }
 
 @keyframes gradientShift {
@@ -20,20 +89,6 @@
   }
 }
 
-.app-header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(25px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 2rem;
-  min-height: 80px;
-}
-
 .app-header::before {
   content: '';
   position: absolute;
@@ -44,99 +99,12 @@
   background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
 }
 
-.app-header-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.app-logo {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-.app-header h1 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0;
-  letter-spacing: -0.025em;
-}
-
-.app-header-right {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 8px;
-  margin-right: 0.5rem;
-}
-
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-}
-
-.user-name {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.header-btn {
-  padding: 0.5rem;
-  background: none;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #6b7280;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.header-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-  color: #374151;
-  transform: scale(1.05);
-}
-
 .app-header-left::after {
   content: '';
   width: 1px;
   height: 20px;
   background: rgba(0, 0, 0, 0.1);
   margin-left: 1rem;
-}
-
-
-.app-main {
-  flex: 1;
-  padding: 1rem;
-  overflow-x: auto;
 }
 
 /* モバイル対応のレスポンシブデザイン */

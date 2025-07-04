@@ -33,7 +33,6 @@ export const useDeviceDetection = () => {
       
       // 画面サイズによる判定
       const screenWidth = window.innerWidth
-      const screenHeight = window.innerHeight
       const isMobileScreen = screenWidth <= 768
       const isTabletScreen = screenWidth > 768 && screenWidth <= 1024
       
@@ -55,15 +54,15 @@ export const useDeviceDetection = () => {
       }
       
       // デバッグ情報
-      console.log('[DeviceDetection] Device info:', {
-        userAgent,
-        screenWidth,
-        screenHeight,
-        isTouchDevice,
-        isMobileUA,
-        isTabletUA,
-        result: newDeviceInfo
-      })
+      // console.log('[DeviceDetection] Device info:', {
+      //   userAgent,
+      //   screenWidth,
+      //   screenHeight,
+      //   isTouchDevice,
+      //   isMobileUA,
+      //   isTabletUA,
+      //   result: newDeviceInfo
+      // })
       
       setDeviceInfo(newDeviceInfo)
     }

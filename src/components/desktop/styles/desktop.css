@@ -87,4 +87,182 @@
 
 .context-menu-item:last-child {
   border-bottom: none;
+}
+
+/* デスクトップ専用アプリケーションスタイル */
+
+/* デスクトップ用のアプリ背景とレイアウト */
+.app {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+  background-size: 400% 400%;
+  animation: desktopGradientShift 60s ease infinite;
+}
+
+@keyframes desktopGradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* デスクトップヘッダースタイル */
+.app-header {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(25px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 1.25rem 2.5rem;
+  min-height: 90px;
+  gap: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.app-header::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.1), transparent);
+}
+
+.app-header-left {
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.app-logo {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  font-size: 1.125rem;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.app-header h1 {
+  font-size: 1.5rem;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.app-header-left::after {
+  content: '';
+  width: 1px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.1);
+  margin-left: 1rem;
+}
+
+.app-header-right {
+  gap: 1rem;
+}
+
+.user-info {
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.user-info:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-name {
+  font-size: 0.9rem;
+  color: #374151;
+  max-width: 140px;
+}
+
+.header-btn {
+  padding: 0.75rem;
+  color: #6b7280;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.header-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: #374151;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.header-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.app-main {
+  padding: 2rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* デスクトップ特有のスクロールバースタイル */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+  background-clip: content-box;
+}
+
+/* デスクトップ用セレクション */
+::selection {
+  background: rgba(99, 102, 241, 0.3);
+  color: #1f2937;
+}
+
+/* デスクトップ用のフォーカススタイル */
+*:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* デスクトップ用のアニメーション */
+* {
+  scroll-behavior: smooth;
+}
+
+/* デスクトップ専用の影とエフェクト */
+.desktop-shadow-sm { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+.desktop-shadow { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06); }
+.desktop-shadow-md { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06); }
+.desktop-shadow-lg { box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05); }
+
+/* デスクトップホバーエフェクト */
+.desktop-hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.desktop-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 } 

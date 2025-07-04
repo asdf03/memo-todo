@@ -9,8 +9,8 @@
 .lists-container-mobile {
   display: flex;
   flex-direction: row;
-  gap: 12px;
-  padding: 16px;
+  gap: 8px;
+  padding: 8px;
   overflow-x: auto;
   overflow-y: hidden;
   flex: 1;
@@ -132,16 +132,26 @@ body.mobile-dragging {
   }
 }
 
-/* 小さな画面用の調整 */
+/* レスポンシブ調整 */
 @media (max-width: 480px) {
   .lists-container-mobile {
-    padding: 12px;
-    gap: 8px;
+    gap: 6px;
+    padding: 6px;
   }
   
   .list-wrapper-mobile {
     width: 260px;
-    max-width: 80vw;
+  }
+}
+
+@media (max-width: 360px) {
+  .lists-container-mobile {
+    gap: 4px;
+    padding: 4px;
+  }
+  
+  .list-wrapper-mobile {
+    width: 240px;
   }
 }
 

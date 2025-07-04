@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { useBoardOperations } from '../../hooks/useBoardOperations'
 import './styles/ListActionsMobile.css'
 
@@ -11,17 +11,11 @@ const ListActionsMobile: React.FC<ListActionsMobileProps> = ({ listId }) => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const { addCard } = useBoardOperations()
 
   const handleShow = useCallback(() => {
     setIsVisible(true)
-    // モバイルでは少し遅延してフォーカス
-    setTimeout(() => {
-      inputRef.current?.focus()
-    }, 100)
   }, [])
 
   const handleHide = useCallback(() => {
@@ -31,10 +25,10 @@ const ListActionsMobile: React.FC<ListActionsMobileProps> = ({ listId }) => {
   }, [])
 
   const handleSave = useCallback(async () => {
-    if (!title.trim()) return
-
-    setIsLoading(true)
+    if (!title.trim() || isLoading) return
+    
     try {
+      setIsLoading(true)
       await addCard(listId, title.trim())
       setTitle('')
       setDescription('')
@@ -44,16 +38,13 @@ const ListActionsMobile: React.FC<ListActionsMobileProps> = ({ listId }) => {
     } finally {
       setIsLoading(false)
     }
-  }, [listId, title, addCard])
+  }, [listId, title, addCard, isLoading])
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSave()
-    } else if (e.key === 'Escape') {
-      handleHide()
-    }
-  }, [handleSave, handleHide])
+  const handleCancel = useCallback(() => {
+    setTitle('')
+    setDescription('')
+    setIsVisible(false)
+  }, [])
 
   // スワイプジェスチャーでフォームを閉じる
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -80,17 +71,6 @@ const ListActionsMobile: React.FC<ListActionsMobileProps> = ({ listId }) => {
     
     document.addEventListener('touchend', handleTouchEnd, { once: true })
   }, [handleHide])
-
-  // テキストエリアの自動リサイズ
-  const handleDescriptionChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setDescription(e.target.value)
-    
-    // 自動リサイズ
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
-    }
-  }, [])
 
   if (!isVisible) {
     return (
@@ -121,31 +101,28 @@ const ListActionsMobile: React.FC<ListActionsMobileProps> = ({ listId }) => {
       <div className="add-card-content-mobile">
         <div className="add-card-field-mobile">
           <input
-            ref={inputRef}
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="カードのタイトル"
-            className="add-card-input-mobile"
-            maxLength={150}
+            placeholder="カードタイトル"
+            className="title-input-mobile"
             disabled={isLoading}
+            maxLength={100}
           />
           <div className="add-card-count-mobile">
-            {title.length}/150
+            {title.length}/100
           </div>
         </div>
         
         <div className="add-card-field-mobile">
           <textarea
-            ref={textareaRef}
             value={description}
-            onChange={handleDescriptionChange}
-            onKeyDown={handleKeyDown}
-            placeholder="説明（任意）"
-            className="add-card-textarea-mobile"
-            maxLength={500}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="説明（オプション）"
+            className="description-input-mobile"
             disabled={isLoading}
+            maxLength={500}
+            rows={3}
           />
           <div className="add-card-count-mobile">
             {description.length}/500
@@ -164,7 +141,7 @@ const ListActionsMobile: React.FC<ListActionsMobileProps> = ({ listId }) => {
         </button>
         <button
           className="add-card-cancel-mobile"
-          onClick={handleHide}
+          onClick={handleCancel}
           disabled={isLoading}
           aria-label="キャンセル"
         >

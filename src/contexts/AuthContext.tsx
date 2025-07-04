@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       // フォールバック
-      return 'http://localhost:5173/'
+      return 'http://localhost:3000/'
     }
 
     const redirectUrl = getRedirectUrl()

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Card, List } from '../../types'
 import ListView from '../shared/ListView'
 import AddListForm from '../shared/common/AddListForm'
@@ -115,37 +115,6 @@ const BoardViewDesktop: React.FC = () => {
     setSelectedListIndex(index === selectedListIndex ? -1 : index)
   }, [selectedListIndex])
 
-  // キーボードショートカット
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        switch (e.key) {
-          case 'ArrowLeft':
-            e.preventDefault()
-            setSelectedListIndex(prev => Math.max(0, prev - 1))
-            break
-          case 'ArrowRight':
-            e.preventDefault()
-            setSelectedListIndex(prev => Math.min(board.lists.length - 1, prev + 1))
-            break
-          case 'n':
-            e.preventDefault()
-            // 新しいリスト作成にフォーカス
-            const addListButton = document.querySelector('.add-list-button') as HTMLElement
-            addListButton?.focus()
-            break
-        }
-      }
-      
-      if (e.key === 'Escape') {
-        setSelectedListIndex(-1)
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [board.lists.length])
-
   return (
     <div className="board-view-desktop">
       <div className="lists-container-desktop">
@@ -168,9 +137,6 @@ const BoardViewDesktop: React.FC = () => {
               onDragOver={(e) => handleListDragOver(e, index)}
               onDragLeave={handleListDragLeave}
               onDrop={(e) => handleListDrop(e, index)}
-              tabIndex={0}
-              role="button"
-              aria-label={`リスト: ${list.title}`}
             >
               <ListView
                 list={list}
@@ -184,19 +150,6 @@ const BoardViewDesktop: React.FC = () => {
           )
         })}
         <AddListForm />
-      </div>
-      
-      {/* キーボードショートカットヘルプ */}
-      <div className="keyboard-shortcuts-hint">
-        <div className="shortcuts-item">
-          <kbd>Ctrl</kbd> + <kbd>←</kbd> / <kbd>→</kbd> リスト選択
-        </div>
-        <div className="shortcuts-item">
-          <kbd>Ctrl</kbd> + <kbd>N</kbd> 新しいリスト
-        </div>
-        <div className="shortcuts-item">
-          <kbd>Esc</kbd> 選択解除
-        </div>
       </div>
     </div>
   )

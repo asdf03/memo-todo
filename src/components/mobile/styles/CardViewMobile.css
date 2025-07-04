@@ -1,19 +1,18 @@
-/* モバイル専用CardViewスタイル */
+/* モバイル専用CardViewスタイル - モダン・ミニマル設計 */
 .card-view-mobile {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: #ffffff;
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  margin-bottom: 12px;
+  border: 1px solid #f1f5f9;
+  margin: 0 0 8px 0;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -21,32 +20,38 @@
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   touch-action: none;
-  min-height: 60px; /* タッチフレンドリーなサイズ */
+  min-height: 64px;
 }
 
 .card-view-mobile:active {
-  background: rgba(0, 0, 0, 0.05);
+  background: #f8fafc;
   transform: scale(0.98);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.card-view-mobile:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
 }
 
 .card-view-mobile.card-drag-over {
-  background: rgba(99, 102, 241, 0.1);
-  border: 2px dashed #6366f1;
+  background: #f0f4ff;
+  border: 2px solid #3b82f6;
   transform: scale(1.02);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
 }
 
 .card-view-mobile.dragging {
-  opacity: 0.7;
-  transform: scale(1.05);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  opacity: 0.8;
+  transform: scale(1.05) rotate(2deg);
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.9);
+  background: #ffffff;
 }
 
 .card-content-mobile {
   flex: 1;
-  min-width: 0; /* テキストオーバーフロー対応 */
+  min-width: 0;
 }
 
 .card-title-mobile {
@@ -54,8 +59,9 @@
   margin-bottom: 8px;
   word-wrap: break-word;
   font-weight: 600;
-  color: #1f2937;
+  color: #111827;
   line-height: 1.4;
+  letter-spacing: -0.025em;
 }
 
 .card-description-mobile {
@@ -67,78 +73,89 @@
 }
 
 .delete-card-btn-mobile {
-  background: #ef4444;
-  color: white;
+  background: #f8fafc;
+  color: #64748b;
   border: none;
   border-radius: 8px;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 18px;
-  font-weight: bold;
-  transition: all 0.2s ease;
-  opacity: 0.8;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.7;
   touch-action: manipulation;
   flex-shrink: 0;
 }
 
 .delete-card-btn-mobile:active {
-  background: #dc2626;
-  transform: scale(0.95);
+  background: #fee2e2;
+  color: #dc2626;
+  transform: scale(0.9);
   opacity: 1;
 }
 
 /* 編集モード */
 .card-edit-mobile {
-  background: white;
+  background: #ffffff;
   border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  border: 2px solid #6366f1;
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  margin: 0 0 8px 0;
 }
 
 .card-title-input-mobile {
   width: 100%;
   font-size: 16px;
-  color: #172b4d;
-  border: 2px solid #6366f1;
+  color: #111827;
+  border: 2px solid #e5e7eb;
   border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
   outline: none;
   font-weight: 600;
-  background: white;
+  background: #ffffff;
+  transition: border-color 0.2s ease;
+}
+
+.card-title-input-mobile:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .card-description-input-mobile {
   width: 100%;
   font-size: 14px;
-  color: #172b4d;
-  border: 2px solid #ddd;
+  color: #374151;
+  border: 2px solid #e5e7eb;
   border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
   outline: none;
   resize: vertical;
   font-family: inherit;
   min-height: 80px;
+  line-height: 1.5;
+  transition: border-color 0.2s ease;
 }
 
 .card-description-input-mobile:focus {
-  border-color: #6366f1;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .card-edit-actions-mobile {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   justify-content: flex-end;
 }
 
 .save-btn-mobile {
-  background-color: #6366f1;
+  background-color: #3b82f6;
   color: white;
   border: none;
   border-radius: 8px;
@@ -146,31 +163,31 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 80px;
 }
 
 .save-btn-mobile:active {
-  background-color: #5855eb;
+  background-color: #2563eb;
   transform: scale(0.95);
 }
 
 .cancel-btn-mobile {
-  background: #f3f4f6;
-  color: #6b7280;
-  border: none;
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 12px 20px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 80px;
 }
 
 .cancel-btn-mobile:active {
-  background: #e5e7eb;
-  color: #4b5563;
+  background: #f1f5f9;
+  color: #475569;
   transform: scale(0.95);
 }
 
@@ -207,37 +224,69 @@ body.mobile-dragging .card-view-mobile {
 /* 小さい画面用の調整 */
 @media (max-width: 480px) {
   .card-view-mobile {
-    padding: 12px;
-    gap: 8px;
+    padding: 8px 10px;
+    gap: 6px;
+    margin: 0 6px 4px 6px;
+    min-height: 44px;
   }
   
   .card-title-mobile {
-    font-size: 14px;
+    font-size: 13px;
+    margin-bottom: 3px;
   }
   
   .card-description-mobile {
-    font-size: 12px;
+    font-size: 11px;
   }
   
   .delete-card-btn-mobile {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
   }
   
   .card-edit-mobile {
-    padding: 12px;
+    padding: 10px;
+    margin: 0 6px 4px 6px;
   }
   
   .card-title-input-mobile,
   .card-description-input-mobile {
-    padding: 10px;
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  
+  .card-description-input-mobile {
+    min-height: 50px;
   }
   
   .save-btn-mobile,
   .cancel-btn-mobile {
-    padding: 10px 16px;
+    padding: 6px 12px;
+    font-size: 11px;
+    min-width: 50px;
+  }
+}
+
+@media (max-width: 360px) {
+  .card-view-mobile {
+    padding: 6px 8px;
+    gap: 4px;
+    margin: 0 4px 3px 4px;
+    min-height: 40px;
+  }
+  
+  .card-title-mobile {
     font-size: 12px;
-    min-width: 70px;
+  }
+  
+  .card-description-mobile {
+    font-size: 10px;
+  }
+  
+  .delete-card-btn-mobile {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
   }
 } 
