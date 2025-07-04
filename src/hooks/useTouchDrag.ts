@@ -1,7 +1,7 @@
 import { useRef, useCallback } from 'react'
 
 interface TouchDragConfig {
-  onDragStart?: (e: React.TouchEvent) => void
+  onDragStart?: (e: React.TouchEvent) => boolean | void
   onDragMove?: (e: React.TouchEvent, deltaX: number, deltaY: number) => void
   onDragEnd?: (e: React.TouchEvent, endX: number, endY: number) => void
   dragThreshold?: number
@@ -36,9 +36,14 @@ export const useTouchDrag = (config: TouchDragConfig) => {
 
     // ドラッグ開始の閾値を超えた場合
     if (!dragStarted.current && distance > dragThreshold) {
+      const shouldStart = onDragStart?.(e)
+      if (shouldStart === false) {
+        // ドラッグをキャンセル
+        startPos.current = null
+        return
+      }
       dragStarted.current = true
       isDragging.current = true
-      onDragStart?.(e)
     }
 
     if (isDragging.current) {

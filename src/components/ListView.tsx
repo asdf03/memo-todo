@@ -24,7 +24,7 @@ const ListView: React.FC<ListViewProps> = ({ list, isAnimating = false, isDispla
   const { board } = useBoardContext()
   const { reorderLists } = useBoardOperations()
   
-  // タッチドラッグ機能
+  // タッチドラッグ機能（カードコンテナエリアのみ）
   const touchDrag = useTouchDrag({
     onDragStart: () => {
       setIsDragMode(true)
@@ -63,9 +63,6 @@ const ListView: React.FC<ListViewProps> = ({ list, isAnimating = false, isDispla
       <div 
         className={`list-view ${isAnimating ? 'list-dropped-animation' : ''} ${isDisplaced ? 'list-displaced-animation' : ''} ${isDragMode ? 'touch-dragging' : ''}`}
         data-list-id={list.id}
-        onTouchStart={touchDrag.onTouchStart}
-        onTouchMove={touchDrag.onTouchMove}
-        onTouchEnd={touchDrag.onTouchEnd}
         style={{
           transform: isDragMode ? `translate(${dragOffset.x}px, ${dragOffset.y}px)` : 'none',
           zIndex: isDragMode ? 1000 : 'auto',
@@ -78,10 +75,17 @@ const ListView: React.FC<ListViewProps> = ({ list, isAnimating = false, isDispla
           onListDragEnd={onListDragEnd}
         />
         
-        <CardContainer 
-          list={list}
-        onCardDrop={onCardDrop}
-      />
+        <div 
+          className="list-drag-handle"
+          onTouchStart={touchDrag.onTouchStart}
+          onTouchMove={touchDrag.onTouchMove}
+          onTouchEnd={touchDrag.onTouchEnd}
+        >
+          <CardContainer 
+            list={list}
+            onCardDrop={onCardDrop}
+          />
+        </div>
       
         <ListActions listId={list.id} />
       </div>
