@@ -54,10 +54,20 @@ const BoardView: React.FC = () => {
     e.preventDefault()
     
     // 通常のドラッグ&ドロップまたはモバイルのカスタムイベントを処理
-    const hasListData = e.dataTransfer?.types.includes('text/list') || 
-                       (e.dataTransfer?.getData && e.dataTransfer.getData('text/list'))
+    let hasListData = false
+    let listId = ''
     
-    if (draggedList && hasListData) {
+    if (e.dataTransfer?.types.includes('text/list') || e.dataTransfer?.getData) {
+      // 通常のドラッグ&ドロップ
+      hasListData = true
+      listId = e.dataTransfer.getData('text/list')
+    } else if (e.detail?.dataTransfer?.types.includes('text/list')) {
+      // モバイルのカスタムイベント
+      hasListData = true
+      listId = e.detail.dataTransfer.getData('text/list')
+    }
+    
+    if (draggedList && hasListData && listId === draggedList.id) {
       const dragIndex = board.lists.findIndex(l => l.id === draggedList.id)
       
       if (dragIndex !== dropIndex && dragIndex !== -1) {

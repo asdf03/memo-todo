@@ -240,4 +240,34 @@
     background-color: rgba(0, 0, 0, 0.03);
     border-radius: 8px;
   }
+  
+  /* モバイルドラッグ中の追加スタイル */
+  .list-header.dragging {
+    position: relative;
+    z-index: 1000;
+  }
+  
+  /* モバイルドラッグ中のリスト全体の視覚効果 */
+  .list-header.dragging ~ * {
+    opacity: 0.6;
+    transform: scale(0.95);
+    transition: all 0.2s ease;
+  }
+  
+  /* ドラッグ中のボディスクロール無効化 */
+  body.mobile-dragging {
+    overflow: hidden;
+    touch-action: none;
+  }
+  
+  /* ドラッグ中のタイトルハイライト */
+  .list-title {
+    transition: all 0.2s ease;
+  }
+  
+  .list-header.dragging .list-title {
+    color: #6366f1 !important;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
 }

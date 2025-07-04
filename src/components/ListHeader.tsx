@@ -48,6 +48,8 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onL
 
   const handleListDragEnd = useCallback(() => {
     setIsDragging(false)
+    // モバイルドラッグ時のスクロール復元
+    document.body.classList.remove('mobile-dragging')
     onListDragEnd?.()
   }, [onListDragEnd])
 
@@ -62,6 +64,8 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onL
     longPressTimer.current = setTimeout(() => {
       // モバイル用のドラッグ開始処理
       setIsDragging(true)
+      // モバイルドラッグ時のスクロール無効化
+      document.body.classList.add('mobile-dragging')
       onListDragStart?.(e as any, list)
     }, 500)
   }, [isEditingTitle, onListDragStart, list])
@@ -73,8 +77,8 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onL
     const deltaX = Math.abs(touch.clientX - touchStartPos.current.x)
     const deltaY = Math.abs(touch.clientY - touchStartPos.current.y)
     
-    // 一定以上移動したら長押し取消
-    if (deltaX > 10 || deltaY > 10) {
+    // 一定以上移動したら長押し取消（ドラッグ開始前のみ）
+    if (!isDragging && (deltaX > 10 || deltaY > 10)) {
       if (longPressTimer.current) {
         clearTimeout(longPressTimer.current)
         longPressTimer.current = null
@@ -83,9 +87,26 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onL
     
     // ドラッグ中の場合、視覚的フィードバックを提供
     if (isDragging) {
-      // ドラッグ中の処理をここに追加可能
+      e.preventDefault() // スクロールを防止
+      
+      // ドラッグ中の他のリストにドラッグオーバー効果を適用
+      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
+      const allListWrappers = document.querySelectorAll('.list-wrapper')
+      
+      // 既存のドラッグオーバークラスを削除
+      allListWrappers.forEach(wrapper => {
+        wrapper.classList.remove('drag-over')
+      })
+      
+      // 現在の位置にあるリストラッパーにドラッグオーバー効果を適用
+      if (elementBelow) {
+        const targetListWrapper = elementBelow.closest('.list-wrapper')
+        if (targetListWrapper && targetListWrapper !== elementBelow.closest(`[data-list-id="${list.id}"]`)?.closest('.list-wrapper')) {
+          targetListWrapper.classList.add('drag-over')
+        }
+      }
     }
-  }, [isDragging])
+  }, [isDragging, list.id])
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (longPressTimer.current) {
@@ -98,16 +119,40 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onL
       const touch = e.changedTouches[0]
       const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
       
+      // 全てのドラッグオーバークラスを削除
+      const allListWrappers = document.querySelectorAll('.list-wrapper')
+      allListWrappers.forEach(wrapper => {
+        wrapper.classList.remove('drag-over')
+      })
+      
       if (elementBelow) {
-        // ドロップ先のリストを見つける
-        const listWrapper = elementBelow.closest('.list-wrapper')
-        if (listWrapper) {
-          const listElements = Array.from(document.querySelectorAll('.list-wrapper'))
-          const dropIndex = listElements.indexOf(listWrapper)
+        // ドロップ先のリストラッパーを見つける
+        const targetListWrapper = elementBelow.closest('.list-wrapper')
+        if (targetListWrapper) {
+          const allWrappers = Array.from(document.querySelectorAll('.list-wrapper'))
+          const dropIndex = allWrappers.indexOf(targetListWrapper)
+          const currentIndex = allWrappers.findIndex(wrapper => 
+            wrapper.querySelector(`[data-list-id="${list.id}"]`)
+          )
           
-          if (dropIndex !== -1) {
-            // ドロップイベントをシミュレート
-            const dropEvent = new Event('drop') as any
+          if (dropIndex !== -1 && currentIndex !== -1 && dropIndex !== currentIndex) {
+            // カスタムドロップイベントを作成してディスパッチ
+            const dropEvent = new CustomEvent('drop', {
+              detail: {
+                listId: list.id,
+                dropIndex: dropIndex,
+                dataTransfer: {
+                  types: ['text/list'],
+                  getData: (type: string) => {
+                    if (type === 'text/list') return list.id
+                    if (type === 'application/json') return JSON.stringify(list)
+                    return ''
+                  }
+                }
+              }
+            }) as any
+            
+            // dataTransferプロパティを追加
             dropEvent.dataTransfer = {
               types: ['text/list'],
               getData: (type: string) => {
@@ -117,7 +162,7 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onL
               }
             }
             
-            listWrapper.dispatchEvent(dropEvent)
+            targetListWrapper.dispatchEvent(dropEvent)
           }
         }
       }
