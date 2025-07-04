@@ -16,21 +16,13 @@ interface ListViewProps {
 
 const ListView: React.FC<ListViewProps> = ({ list, isAnimating = false, isDisplaced = false, onCardDrop, onListDragStart, onListDragEnd }) => {
   const [isDragging, setIsDragging] = useState(false)
-  const [isEditingTitle, setIsEditingTitle] = useState(false)
 
-  // PC版のドラッグイベントハンドラー
-  const handleDragStart = useCallback((e: React.DragEvent) => {
-    // タイトル編集中はドラッグを無効化
-    if (isEditingTitle) {
-      e.preventDefault()
-      return
-    }
-    
+  const handleListDragStart = useCallback((e: React.DragEvent) => {
     setIsDragging(true)
     onListDragStart?.(e, list)
-  }, [list, onListDragStart, isEditingTitle])
+  }, [list, onListDragStart])
 
-  const handleDragEnd = useCallback(() => {
+  const handleListDragEnd = useCallback(() => {
     setIsDragging(false)
     onListDragEnd?.()
   }, [onListDragEnd])
@@ -40,15 +32,11 @@ const ListView: React.FC<ListViewProps> = ({ list, isAnimating = false, isDispla
       <div 
         className={`list-view ${isAnimating ? 'list-dropped-animation' : ''} ${isDisplaced ? 'list-displaced-animation' : ''} ${isDragging ? 'dragging' : ''}`}
         data-list-id={list.id}
-        draggable={!isEditingTitle}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
       >
         <ListHeader 
           list={list}
-          onListDragStart={handleDragStart}
-          onListDragEnd={handleDragEnd}
-          onEditingChange={setIsEditingTitle}
+          onListDragStart={handleListDragStart}
+          onListDragEnd={handleListDragEnd}
         />
         
         <CardContainer 

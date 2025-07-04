@@ -6,10 +6,9 @@ interface ListHeaderProps {
   list: List
   onListDragStart?: (e: React.DragEvent, list: List) => void
   onListDragEnd?: () => void
-  onEditingChange?: (isEditing: boolean) => void
 }
 
-const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onListDragEnd, onEditingChange }) => {
+const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onListDragEnd }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [titleInput, setTitleInput] = useState(list.title)
   const [isDragging, setIsDragging] = useState(false)
@@ -21,11 +20,6 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onL
   useEffect(() => {
     setTitleInput(list.title)
   }, [list.title])
-
-  // 編集状態の変更を親に通知
-  useEffect(() => {
-    onEditingChange?.(isEditingTitle)
-  }, [isEditingTitle, onEditingChange])
 
   // クリーンアップ
   useEffect(() => {
@@ -66,19 +60,11 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onL
     
     // 長押しタイマー開始
     longPressTimer.current = setTimeout(() => {
-      // PC版のドラッグイベントをシミュレート
-      const fakeEvent = {
-        dataTransfer: {
-          setData: (_type: string, _data: string) => {},
-          effectAllowed: 'move'
-        },
-        preventDefault: () => {},
-        stopPropagation: () => {}
-      } as React.DragEvent
-      
-      handleListDragStart(fakeEvent)
+      // モバイル用のドラッグ開始処理
+      setIsDragging(true)
+      onListDragStart?.(e as any, list)
     }, 500)
-  }, [isEditingTitle, handleListDragStart])
+  }, [isEditingTitle, onListDragStart, list])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!touchStartPos.current) return
@@ -94,19 +80,53 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({ list, onListDragStart, onL
         longPressTimer.current = null
       }
     }
-  }, [])
+    
+    // ドラッグ中の場合、視覚的フィードバックを提供
+    if (isDragging) {
+      // ドラッグ中の処理をここに追加可能
+    }
+  }, [isDragging])
 
-  const handleTouchEnd = useCallback(() => {
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current)
       longPressTimer.current = null
     }
-    touchStartPos.current = null
     
     if (isDragging) {
+      // タッチ終了位置でドロップ処理を実行
+      const touch = e.changedTouches[0]
+      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
+      
+      if (elementBelow) {
+        // ドロップ先のリストを見つける
+        const listWrapper = elementBelow.closest('.list-wrapper')
+        if (listWrapper) {
+          const listElements = Array.from(document.querySelectorAll('.list-wrapper'))
+          const dropIndex = listElements.indexOf(listWrapper)
+          
+          if (dropIndex !== -1) {
+            // ドロップイベントをシミュレート
+            const dropEvent = new Event('drop') as any
+            dropEvent.dataTransfer = {
+              types: ['text/list'],
+              getData: (type: string) => {
+                if (type === 'text/list') return list.id
+                if (type === 'application/json') return JSON.stringify(list)
+                return ''
+              }
+            }
+            
+            listWrapper.dispatchEvent(dropEvent)
+          }
+        }
+      }
+      
       handleListDragEnd()
     }
-  }, [isDragging, handleListDragEnd])
+    
+    touchStartPos.current = null
+  }, [isDragging, handleListDragEnd, list])
 
   const handleTouchCancel = useCallback(() => {
     if (longPressTimer.current) {

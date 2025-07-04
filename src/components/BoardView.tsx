@@ -20,7 +20,7 @@ const BoardView: React.FC = () => {
     await moveCard(card, targetListId, targetIndex)
   }
 
-  const handleListDragStart = (_e: React.DragEvent, list: List) => {
+  const handleListDragStart = (_e: React.DragEvent | any, list: List) => {
     setDraggedList(list)
     const listIndex = board.lists.findIndex(l => l.id === list.id)
     setDraggedListIndex(listIndex)
@@ -35,7 +35,7 @@ const BoardView: React.FC = () => {
 
   const handleListDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault()
-    if (e.dataTransfer.types.includes('text/list')) {
+    if (e.dataTransfer?.types.includes('text/list')) {
       setDragOverIndex(index)
     }
   }
@@ -50,10 +50,14 @@ const BoardView: React.FC = () => {
     }
   }
 
-  const handleListDrop = async (e: React.DragEvent, dropIndex: number) => {
+  const handleListDrop = async (e: React.DragEvent | any, dropIndex: number) => {
     e.preventDefault()
     
-    if (draggedList && e.dataTransfer.types.includes('text/list')) {
+    // 通常のドラッグ&ドロップまたはモバイルのカスタムイベントを処理
+    const hasListData = e.dataTransfer?.types.includes('text/list') || 
+                       (e.dataTransfer?.getData && e.dataTransfer.getData('text/list'))
+    
+    if (draggedList && hasListData) {
       const dragIndex = board.lists.findIndex(l => l.id === draggedList.id)
       
       if (dragIndex !== dropIndex && dragIndex !== -1) {
