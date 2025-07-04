@@ -6,9 +6,6 @@ import LoginPage from './components/LoginPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { BoardProvider } from './context/BoardContext'
 import { BoardAPI } from './lib/boardApi'
-import './App.css'
-import './components/mobile/styles/mobile.css'
-import './components/desktop/styles/desktop.css'
 
 const AppContent: React.FC = () => {
   const { user, loading, signOut } = useAuth()
@@ -89,8 +86,9 @@ const AppContent: React.FC = () => {
   if (loading || boardLoading) {
     return (
       <div className="app">
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          <div>読み込み中...</div>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <div className="loading-text">読み込み中...</div>
         </div>
       </div>
     )
@@ -103,9 +101,11 @@ const AppContent: React.FC = () => {
   if (error) {
     return (
       <div className="app">
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: '1rem' }}>
-          <div>エラー: {error}</div>
-          <button onClick={loadBoard}>再試行</button>
+        <div className="error-container">
+          <div className="error-icon">⚠️</div>
+          <div className="error-title">エラーが発生しました</div>
+          <div className="error-message">{error}</div>
+          <button className="btn btn--primary" onClick={loadBoard}>再試行</button>
         </div>
       </div>
     )
@@ -114,9 +114,12 @@ const AppContent: React.FC = () => {
   if (!board) {
     return (
       <div className="app">
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: '1rem' }}>
-          <div>ボードが見つかりません</div>
+        <div className="error-container">
+          <div className="error-icon">📋</div>
+          <div className="error-title">ボードが見つかりません</div>
+          <div className="error-message">新しいボードを作成して始めましょう</div>
           <button 
+            className="btn btn--primary"
             onClick={async () => {
               if (user) {
                 try {
@@ -139,38 +142,53 @@ const AppContent: React.FC = () => {
     <BoardProvider board={board} onUpdateBoard={setBoard} onRefresh={refreshBoard}>
       <div className="app">
         <header className="app-header">
-          <div className="app-header-left">
-            <div className="app-logo">M</div>
-            <BoardTitle />
-          </div>
-          <div className="app-header-right">
-            <div className="user-info">
-              <img 
-                src={user.user_metadata?.avatar_url} 
-                alt={user.user_metadata?.full_name || 'ユーザー'}
-                className="user-avatar"
-              />
-              <span className="user-name">{user.user_metadata?.full_name}</span>
+          <div className="app-header__content">
+            <div className="app-header__left">
+              <div className="app-logo">📝</div>
+              <BoardTitle />
             </div>
-            <button 
-              className="header-btn" 
-              onClick={refreshBoard}
-            >
-              🔄
-            </button>
-            <button className="header-btn">
-              ⚙️
-            </button>
-            <button className="header-btn">
-              ❓
-            </button>
-            <button className="header-btn" onClick={handleSignOut}>
-              🚪
-            </button>
+            <div className="app-header__right">
+              <div className="user-info">
+                <img 
+                  src={user.user_metadata?.avatar_url} 
+                  alt={user.user_metadata?.full_name || 'ユーザー'}
+                  className="user-avatar"
+                />
+                <span className="user-name">{user.user_metadata?.full_name}</span>
+              </div>
+              <button 
+                className="btn btn--ghost btn--icon" 
+                onClick={refreshBoard}
+                aria-label="更新"
+              >
+                🔄
+              </button>
+              <button 
+                className="btn btn--ghost btn--icon"
+                aria-label="設定"
+              >
+                ⚙️
+              </button>
+              <button 
+                className="btn btn--ghost btn--icon"
+                aria-label="ヘルプ"
+              >
+                ❓
+              </button>
+              <button 
+                className="btn btn--ghost btn--icon" 
+                onClick={handleSignOut}
+                aria-label="ログアウト"
+              >
+                🚪
+              </button>
+            </div>
           </div>
         </header>
         <main className="app-main">
-          <BoardView />
+          <div className="board-container">
+            <BoardView />
+          </div>
         </main>
       </div>
     </BoardProvider>

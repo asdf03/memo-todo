@@ -1,7 +1,6 @@
 import React, { useState, useEffect, memo } from 'react'
 import { useBoardOperations } from '../../../hooks/useBoardOperations'
 import { useBoardContext } from '../../../context/BoardContext'
-import './BoardTitle.css'
 
 const BoardTitle: React.FC = memo(() => {
   const { board } = useBoardContext()
@@ -38,21 +37,28 @@ const BoardTitle: React.FC = memo(() => {
   if (isEditing) {
     return (
       <input
-        className="board-title-input"
+        className="input"
         value={titleInput}
         onChange={(e) => setTitleInput(e.target.value)}
         onBlur={handleSave}
         onKeyDown={handleKeyDown}
         autoFocus
         placeholder="ボードタイトル"
+        style={{ 
+          fontSize: 'var(--font-size-xl)', 
+          fontWeight: 'var(--font-weight-bold)',
+          minWidth: '200px',
+          maxWidth: '400px'
+        }}
       />
     )
   }
 
   return (
     <h1 
-      className="board-title" 
+      className="app-title" 
       onClick={() => setIsEditing(true)}
+      style={{ cursor: 'pointer' }}
     >
       {board.title}
     </h1>
