@@ -8,9 +8,9 @@ export interface TouchDragState {
 }
 
 export interface UseTouchDragOptions {
-  onDragStart?: (event: TouchEvent, element: HTMLElement) => void
-  onDragMove?: (event: TouchEvent, state: TouchDragState) => void
-  onDragEnd?: (event: TouchEvent, state: TouchDragState) => void
+  onDragStart?: (event: React.TouchEvent, element: HTMLElement) => void
+  onDragMove?: (event: React.TouchEvent, state: TouchDragState) => void
+  onDragEnd?: (event: React.TouchEvent, state: TouchDragState) => void
   threshold?: number // minimum distance to start drag (default: 10px)
   enableHapticFeedback?: boolean
 }
@@ -35,7 +35,7 @@ export const useTouchDrag = (options: UseTouchDragOptions = {}) => {
   const initialTouchRef = useRef<{ x: number; y: number } | null>(null)
   const hasDragStartedRef = useRef(false)
 
-  const handleTouchStart = useCallback((event: TouchEvent) => {
+  const handleTouchStart = useCallback((event: React.TouchEvent) => {
     const touch = event.touches[0]
     if (!touch) return
 
@@ -55,7 +55,7 @@ export const useTouchDrag = (options: UseTouchDragOptions = {}) => {
     event.preventDefault()
   }, [])
 
-  const handleTouchMove = useCallback((event: TouchEvent) => {
+  const handleTouchMove = useCallback((event: React.TouchEvent) => {
     const touch = event.touches[0]
     if (!touch || !initialTouchRef.current) return
 
@@ -105,7 +105,7 @@ export const useTouchDrag = (options: UseTouchDragOptions = {}) => {
     }
   }, [threshold, enableHapticFeedback, onDragStart, onDragMove])
 
-  const handleTouchEnd = useCallback((event: TouchEvent) => {
+  const handleTouchEnd = useCallback((event: React.TouchEvent) => {
     if (hasDragStartedRef.current && dragState.isDragging) {
       // Haptic feedback when drag ends
       if (enableHapticFeedback && navigator.vibrate) {

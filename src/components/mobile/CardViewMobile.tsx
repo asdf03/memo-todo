@@ -110,7 +110,7 @@ const CardViewMobile: React.FC<CardViewMobileProps> = memo(({
   // Touch drag setup
   const { dragState, touchHandlers, isDragging } = useTouchDrag({
     threshold: 15,
-    onDragStart: (event, element) => {
+    onDragStart: (_, element) => {
       if (isEditing) return
       
       // Add mobile dragging class
@@ -159,7 +159,7 @@ const CardViewMobile: React.FC<CardViewMobileProps> = memo(({
       
       onDragStart(fakeEvent, card, cardIndex)
     },
-    onDragMove: (event, state) => {
+    onDragMove: () => {
       if (!dragState.currentPosition) return
       
       // Update drag preview position
@@ -171,7 +171,7 @@ const CardViewMobile: React.FC<CardViewMobileProps> = memo(({
       // Handle drop zone detection
       dropZoneTouchMove(dragState.currentPosition)
     },
-    onDragEnd: (event, state) => {
+    onDragEnd: () => {
       if (!dragState.currentPosition) return
       
       // Handle drop

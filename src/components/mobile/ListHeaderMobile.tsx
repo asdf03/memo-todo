@@ -13,7 +13,7 @@ interface ListHeaderMobileProps {
 const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDragStart, onListDragEnd }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [titleInput, setTitleInput] = useState(list.title)
-  const { deleteList, updateList } = useBoardOperations()
+  const { deleteList, updateListTitle } = useBoardOperations()
   const [isLoading] = useState(false)
   const headerRef = useRef<HTMLDivElement>(null)
   const [currentDropZone, setCurrentDropZone] = useState<string | null>(null)
@@ -85,7 +85,7 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
   // Touch drag setup
   const { dragState, touchHandlers, isDragging } = useTouchDrag({
     threshold: 15,
-    onDragStart: (event, element) => {
+    onDragStart: (_, element) => {
       if (isEditingTitle) return
       
       // Add mobile dragging class
@@ -123,7 +123,7 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
       
       onListDragStart?.(fakeEvent, list)
     },
-    onDragMove: (event, state) => {
+    onDragMove: () => {
       if (!dragState.currentPosition) return
       
       // Update drag preview position
@@ -135,7 +135,7 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
       // Handle drop zone detection
       dropZoneTouchMove(dragState.currentPosition)
     },
-    onDragEnd: (event, state) => {
+    onDragEnd: () => {
       if (!dragState.currentPosition) return
       
       // Handle drop
@@ -177,14 +177,14 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
   const handleTitleSave = useCallback(async () => {
     if (titleInput.trim() && titleInput !== list.title) {
       try {
-        await updateList(list.id, { title: titleInput.trim() })
+        updateListTitle(list.id, titleInput.trim())
       } catch (error) {
         console.error('Failed to update list title:', error)
         setTitleInput(list.title) // Revert on error
       }
     }
     setIsEditingTitle(false)
-  }, [titleInput, list.title, list.id, updateList])
+  }, [titleInput, list.title, list.id, updateListTitle])
 
   const handleTitleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
