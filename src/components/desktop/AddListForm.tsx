@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { useBoardOperations } from '../../hooks/shared/useBoardOperations'
+import { useBoardOperations } from '../../hooks/desktop/useDesktopBoardOperations'
 
 const AddListForm: React.FC = () => {
   const [isAdding, setIsAdding] = useState(false)
@@ -37,31 +37,31 @@ const AddListForm: React.FC = () => {
   if (!isAdding) {
     return (
       <button
-        className="add-list-button"
+        className="add-list-trigger-desktop"
         onClick={() => setIsAdding(true)}
         aria-label="新しいリストを追加"
       >
-        <span className="add-list-icon">+</span>
-        <span className="add-list-text">リストを追加</span>
+        <span className="add-list-icon-desktop">+</span>
+        <span className="add-list-text-desktop">リストを追加</span>
       </button>
     )
   }
 
   return (
-    <div className="add-list-form-container">
-      <form onSubmit={handleSubmit} className="add-list-form">
+    <div className="add-list-form-container-desktop">
+      <form onSubmit={handleSubmit} className="add-list-form-desktop">
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="リストのタイトルを入力..."
-          className="add-list-input"
+          className="add-list-input-desktop"
           autoFocus
           disabled={isLoading}
           maxLength={100}
         />
-        <div className="add-list-actions">
+        <div className="add-list-actions-desktop">
           <button
             type="submit"
             className="btn btn--primary btn--sm"

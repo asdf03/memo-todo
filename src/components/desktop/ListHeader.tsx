@@ -1,6 +1,6 @@
 import React, { useState, memo, useCallback } from 'react'
 import { List } from '../../types'
-import { useBoardOperations } from '../../hooks/shared/useBoardOperations'
+import { useBoardOperations } from '../../hooks/desktop/useDesktopBoardOperations'
 
 interface ListHeaderProps {
   list: List
@@ -47,7 +47,7 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({
 
   return (
     <div 
-      className="list-header"
+      className="list-header-desktop"
       draggable={!isEditingTitle}
       onDragStart={onListDragStart}
       onDragEnd={onListDragEnd}
@@ -60,21 +60,21 @@ const ListHeader: React.FC<ListHeaderProps> = memo(({
           onChange={(e) => setTitleInput(e.target.value)}
           onBlur={handleTitleSave}
           onKeyDown={handleTitleKeyPress}
-          className="list-title-input"
+          className="list-edit-input-desktop"
           autoFocus
           disabled={isLoading}
           maxLength={100}
         />
       ) : (
         <h3 
-          className="list-title" 
+          className="list-title-desktop" 
           onClick={() => setIsEditingTitle(true)}
         >
           {list.title}
         </h3>
       )}
       <button 
-        className="delete-list-btn"
+        className="list-action-btn-desktop"
         onClick={handleDeleteList}
         aria-label="リストを削除"
       >

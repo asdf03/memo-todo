@@ -54,7 +54,7 @@ const CardView: React.FC<CardViewProps> = memo(({
 
   return (
     <div 
-      className={`card ${isDragging ? 'dragging' : ''}`}
+      className={`card-view-desktop ${isDragging ? 'dragging' : ''}`}
       draggable={!isEditing}
       onDragStart={handleDragStart}
       onDragEnd={onCardDragEnd}
@@ -67,20 +67,20 @@ const CardView: React.FC<CardViewProps> = memo(({
           onChange={(e) => setTitleInput(e.target.value)}
           onBlur={handleTitleSave}
           onKeyDown={handleTitleKeyPress}
-          className="card-title-input"
+          className="card-edit-input-desktop"
           autoFocus
           maxLength={200}
         />
       ) : (
         <div 
-          className="card-title" 
+          className="card-title-desktop" 
           onClick={() => setIsEditing(true)}
         >
           {card.title}
         </div>
       )}
       <button 
-        className="delete-card-btn"
+        className="card-action-btn-desktop"
         onClick={handleDelete}
         aria-label="カードを削除"
       >

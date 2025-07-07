@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { useBoardOperations } from '../../hooks/shared/useBoardOperations'
+import { useBoardOperations } from '../../hooks/desktop/useDesktopBoardOperations'
 
 interface ListActionsProps {
   listId: string
@@ -41,31 +41,31 @@ const ListActions: React.FC<ListActionsProps> = ({ listId }) => {
   if (!isAdding) {
     return (
       <button
-        className="add-card-button"
+        className="add-card-trigger-desktop"
         onClick={() => setIsAdding(true)}
         aria-label="新しいカードを追加"
       >
-        <span className="add-card-icon">+</span>
-        <span className="add-card-text">カードを追加</span>
+        <span className="add-card-icon-desktop">+</span>
+        <span className="add-card-text-desktop">カードを追加</span>
       </button>
     )
   }
 
   return (
-    <div className="add-card-form-container">
-      <form onSubmit={handleSubmit} className="add-card-form">
+    <div className="add-card-form-container-desktop">
+      <form onSubmit={handleSubmit} className="add-card-form-desktop">
         <textarea
           value={cardTitle}
           onChange={(e) => setCardTitle(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="カードのタイトルを入力..."
-          className="add-card-input"
+          className="add-card-input-desktop"
           autoFocus
           disabled={isLoading}
           maxLength={200}
           rows={3}
         />
-        <div className="add-card-actions">
+        <div className="add-card-actions-desktop">
           <button
             type="submit"
             className="btn btn--primary btn--sm"

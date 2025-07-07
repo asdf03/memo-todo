@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import { Card, List } from '../../types'
 import CardView from './CardView'
-import { useBoardOperations } from '../../hooks/shared/useBoardOperations'
+import { useBoardOperations } from '../../hooks/desktop/useDesktopBoardOperations'
 
 interface CardContainerProps {
   list: List
@@ -89,14 +89,14 @@ const CardContainer: React.FC<CardContainerProps> = ({ list, onCardDrop }) => {
 
   return (
     <div 
-      className={`cards-container ${dragOverIndex === list.cards.length ? 'drag-over' : ''}`}
+      className={`cards-container-desktop ${dragOverIndex === list.cards.length ? 'drag-over' : ''}`}
       onDragOver={handleContainerDragOver}
       onDrop={handleContainerDrop}
     >
       {list.cards.map((card: Card, index: number) => (
         <div
           key={card.id}
-          className={`card-wrapper ${dragOverIndex === index ? 'drag-over' : ''}`}
+          className={`card-wrapper-desktop ${dragOverIndex === index ? 'drag-over' : ''}`}
           onDragOver={(e) => handleCardDragOver(e, index)}
           onDrop={(e) => handleCardDrop(e, index)}
         >
