@@ -6,16 +6,12 @@ import LoginPage from './components/shared/LoginPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { BoardProvider } from './contexts/BoardContext'
 import { BoardAPI } from './lib/boardApi'
-import { useDynamicCSS } from './hooks/shared/useDynamicCSS'
 
 const AppContent: React.FC = () => {
   const { user, loading, signOut } = useAuth()
   const [board, setBoard] = useState<Board | null>(null)
   const [boardLoading, setBoardLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
-  // CSS動的読み込み
-  useDynamicCSS()
 
   const handleSignOut = async () => {
     try {
