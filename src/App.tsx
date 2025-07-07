@@ -6,7 +6,7 @@ import LoginPage from './components/LoginPage'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { BoardProvider } from './context/BoardContext'
 import { BoardAPI } from './lib/boardApi'
-import { useDynamicCSS } from './hooks/useDynamicCSS'
+// import { useDynamicCSS } from './hooks/useDynamicCSS'
 
 const AppContent: React.FC = () => {
   const { user, loading, signOut } = useAuth()
@@ -15,7 +15,7 @@ const AppContent: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   
   // Load device-specific CSS
-  useDynamicCSS()
+  // useDynamicCSS()
 
   const handleSignOut = async () => {
     try {

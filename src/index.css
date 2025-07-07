@@ -1,6 +1,10 @@
 /* ============================================
-   MEMO TODO - BASE STYLES + DYNAMIC CSS
+   MEMO TODO - BASE STYLES + RESPONSIVE CSS
    ============================================ */
+   
+/* Import device-specific styles */
+@import './styles/mobile.css' screen and (max-width: 768px);
+@import './styles/desktop.css' screen and (min-width: 769px);
 
 /* Reset with modern defaults */
 *,
