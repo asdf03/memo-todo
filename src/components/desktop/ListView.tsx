@@ -27,10 +27,10 @@ const ListView: React.FC<ListViewProps> = ({
 
   return (
     <div 
-      className="list"
+      className="list-view-desktop"
       data-list-id={list.id}
     >
-      <div className="list__header">
+      <div className="list-header-desktop">
         <ListHeader 
           list={list}
           onListDragStart={handleListDragStart}
@@ -38,16 +38,14 @@ const ListView: React.FC<ListViewProps> = ({
         />
       </div>
       
-      <div className="list__content">
-        <div className="list__cards">
-          <CardContainer 
-            list={list}
-            onCardDrop={onCardDrop}
-          />
-        </div>
+      <div className="cards-container-desktop">
+        <CardContainer 
+          list={list}
+          onCardDrop={onCardDrop}
+        />
       </div>
     
-      <div className="list__actions">
+      <div className="list-actions-desktop">
         <ListActions listId={list.id} />
       </div>
     </div>

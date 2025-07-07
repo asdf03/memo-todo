@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react'
 import { Card, List } from '../../types'
 import ListView from './ListView'
 import AddListForm from './AddListForm'
-import { useBoardOperations } from '../../hooks/shared/useBoardOperations'
+import { useBoardOperations } from '../../hooks/desktop/useDesktopBoardOperations'
 import { useBoardContext } from '../../contexts/BoardContext'
 
 const BoardViewDesktop: React.FC = () => {
@@ -69,11 +69,11 @@ const BoardViewDesktop: React.FC = () => {
 
   return (
     <div className="board-view-desktop">
-      <div className="lists-container">
+      <div className="lists-container-desktop">
         {board.lists.map((list: List, index: number) => (
           <div
             key={list.id}
-            className={`list-wrapper ${dragOverIndex === index ? 'drag-over' : ''}`}
+            className={`list-wrapper-desktop ${dragOverIndex === index ? 'drag-over' : ''}`}
             onDragOver={(e) => handleListDragOver(e, index)}
             onDrop={(e) => handleListDrop(e, index)}
             onDragLeave={handleListDragLeave}
@@ -86,7 +86,7 @@ const BoardViewDesktop: React.FC = () => {
             />
           </div>
         ))}
-        <div className="add-list-container">
+        <div className="add-list-container-desktop">
           <AddListForm />
         </div>
       </div>
