@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Default to desktop configuration
+// Desktop configuration
 export default defineConfig({
   plugins: [react()],
   build: {

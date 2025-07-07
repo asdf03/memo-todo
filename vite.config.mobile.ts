@@ -1,21 +1,21 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Default to desktop configuration
+// Mobile configuration
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: 'dist/desktop',
+    outDir: 'dist/mobile',
     rollupOptions: {
-      input: './src/desktop/main.tsx'
+      input: './src/mobile/main.tsx'
     }
   },
   server: {
-    port: 3000,
+    port: 3001,
     host: true,
     open: false
   },
   define: {
-    'process.env.VITE_PLATFORM': '"desktop"'
+    'process.env.VITE_PLATFORM': '"mobile"'
   }
 })
