@@ -1,0 +1,358 @@
+/* デスクトップ専用スタイル */
+@media (min-width: 769px) {
+  :root {
+    /* デスクトップ用の値の調整 */
+    --board-padding: var(--spacing-lg);
+    --list-width: 300px;
+    --list-gap: var(--spacing-md);
+    --card-padding: var(--spacing-md);
+    --header-height: 60px;
+  }
+
+  /* ボード全体 */
+  .board-view-desktop {
+    padding: var(--board-padding);
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .board-header-desktop {
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-lg);
+    padding: 0 var(--spacing-md);
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .board-title-desktop {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* リストコンテナ */
+  .lists-container-desktop {
+    display: flex;
+    gap: var(--list-gap);
+    height: calc(100vh - var(--header-height) - var(--board-padding) * 2 - var(--spacing-lg));
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: var(--spacing-sm);
+  }
+
+  .lists-container-desktop::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .lists-container-desktop::-webkit-scrollbar-track {
+    background: var(--color-gray-100);
+    border-radius: 4px;
+  }
+
+  .lists-container-desktop::-webkit-scrollbar-thumb {
+    background: var(--color-gray-300);
+    border-radius: 4px;
+  }
+
+  .lists-container-desktop::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gray-400);
+  }
+
+  /* リスト */
+  .list-view-desktop {
+    width: var(--list-width);
+    min-width: var(--list-width);
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+  }
+
+  .list-header-desktop {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    cursor: grab;
+  }
+
+  .list-header-desktop.dragging {
+    cursor: grabbing;
+  }
+
+  .list-title-desktop {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    margin-right: var(--spacing-sm);
+  }
+
+  .list-card-count-desktop {
+    background-color: var(--color-gray-200);
+    color: var(--text-secondary);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .list-actions-desktop {
+    display: flex;
+    gap: var(--spacing-xs);
+    margin-left: var(--spacing-sm);
+  }
+
+  .list-action-btn-desktop {
+    background: none;
+    border: none;
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: var(--transition-fast);
+  }
+
+  .list-action-btn-desktop:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+  }
+
+  /* カードコンテナ */
+  .cards-container-desktop {
+    padding: var(--spacing-md);
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .cards-container-desktop::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .cards-container-desktop::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .cards-container-desktop::-webkit-scrollbar-thumb {
+    background: var(--color-gray-300);
+    border-radius: 3px;
+  }
+
+  /* カード */
+  .card-view-desktop {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--card-padding);
+    cursor: grab;
+    transition: var(--transition-fast);
+    position: relative;
+  }
+
+  .card-view-desktop:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-gray-300);
+  }
+
+  .card-view-desktop.dragging {
+    cursor: grabbing;
+    transform: rotate(5deg);
+  }
+
+  .card-title-desktop {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .card-description-desktop {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  .card-actions-desktop {
+    display: none;
+    position: absolute;
+    top: var(--spacing-xs);
+    right: var(--spacing-xs);
+    gap: var(--spacing-xs);
+  }
+
+  .card-view-desktop:hover .card-actions-desktop {
+    display: flex;
+  }
+
+  .card-action-btn-desktop {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    padding: 4px;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    transition: var(--transition-fast);
+  }
+
+  .card-action-btn-desktop:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+    border-color: var(--color-gray-300);
+  }
+
+  /* リスト追加フォーム */
+  .add-list-form-desktop {
+    width: var(--list-width);
+    min-width: var(--list-width);
+  }
+
+  .add-list-trigger-desktop {
+    width: 100%;
+    background-color: var(--bg-hover);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .add-list-trigger-desktop:hover {
+    background-color: var(--color-gray-200);
+    border-color: var(--color-gray-300);
+    color: var(--text-primary);
+  }
+
+  .add-list-form-container-desktop {
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow);
+  }
+
+  .add-list-input-desktop {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .add-list-actions-desktop {
+    display: flex;
+    gap: var(--spacing-sm);
+  }
+
+  /* カード追加フォーム */
+  .add-card-form-desktop {
+    margin-top: var(--spacing-sm);
+  }
+
+  .add-card-trigger-desktop {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+  }
+
+  .add-card-trigger-desktop:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+  }
+
+  .add-card-form-container-desktop {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+  }
+
+  .add-card-input-desktop {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .add-card-actions-desktop {
+    display: flex;
+    gap: var(--spacing-sm);
+  }
+
+  /* ドラッグ&ドロップ - デスクトップ専用 */
+  .list-view-desktop.drag-over {
+    background-color: rgba(0, 123, 255, 0.05);
+    border: 2px dashed var(--color-primary);
+  }
+
+  .card-drop-zone-desktop {
+    height: 4px;
+    margin: 2px 0;
+    border-radius: 2px;
+    transition: var(--transition-fast);
+  }
+
+  .card-drop-zone-desktop.active {
+    background-color: var(--color-primary);
+    height: 8px;
+  }
+
+  /* マウスホバー効果 */
+  @media (hover: hover) {
+    .list-header-desktop:hover {
+      background-color: var(--bg-hover);
+    }
+  }
+
+  /* 編集フォーム */
+  .list-edit-form-desktop {
+    padding: var(--spacing-md);
+    background-color: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .list-edit-input-desktop {
+    margin-bottom: var(--spacing-md);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .list-edit-actions-desktop {
+    display: flex;
+    gap: var(--spacing-sm);
+  }
+
+  .card-edit-form-desktop {
+    padding: var(--card-padding);
+  }
+
+  .card-edit-input-desktop {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .card-edit-actions-desktop {
+    display: flex;
+    gap: var(--spacing-sm);
+  }
+}

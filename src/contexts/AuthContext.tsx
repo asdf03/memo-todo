@@ -67,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const signInWithOAuth = async () => {
+  const signInWithOAuth = async (provider: 'google' | 'github' = 'google') => {
     // 環境に応じたリダイレクトURL設定
     const getRedirectUrl = () => {
       // 環境変数で設定されている場合はそれを使用
@@ -89,7 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('OAuth redirect URL:', redirectUrl)
 
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider,
       options: {
         redirectTo: redirectUrl
       }

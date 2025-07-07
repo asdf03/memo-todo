@@ -43,7 +43,7 @@ export interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
-  signInWithOAuth: (provider: 'google' | 'github') => Promise<void>
+  signInWithOAuth: (provider?: 'google' | 'github') => Promise<void>
 }
 
 export interface BoardContextType {

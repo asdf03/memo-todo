@@ -1,0 +1,514 @@
+/* モバイル専用スタイル */
+@media (max-width: 768px) {
+  :root {
+    /* モバイル用の値の調整 */
+    --board-padding: var(--spacing-md);
+    --list-gap: var(--spacing-md);
+    --card-padding: var(--spacing-md);
+    --header-height: 56px;
+    --touch-target: 44px; /* Appleのヒューマンインターフェースガイドライン準拠 */
+  }
+
+  /* 基本設定 */
+  body {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+  }
+
+  body.mobile-dragging {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+  }
+
+  body.touch-dragging {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  /* ボード全体 */
+  .board-view-mobile {
+    padding: var(--board-padding);
+    min-height: 100vh;
+    padding-bottom: calc(var(--board-padding) + 20px); /* 下部余白 */
+  }
+
+  .board-header-mobile {
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-lg);
+    padding: 0 var(--spacing-md);
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: var(--spacing-md);
+    z-index: 100;
+  }
+
+  .board-title-mobile {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* リストコンテナ */
+  .lists-container-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--list-gap);
+  }
+
+  /* リスト */
+  .list-wrapper-mobile {
+    transition: var(--transition-normal);
+  }
+
+  .list-wrapper-mobile.drag-over {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .list-view-mobile {
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: var(--transition-normal);
+  }
+
+  .list-view-mobile.dragging {
+    transform: rotate(2deg) scale(1.05);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+  }
+
+  .list-view-mobile.drag-over {
+    background-color: rgba(0, 123, 255, 0.05);
+    border: 2px solid var(--color-primary);
+  }
+
+  /* リストヘッダー */
+  .list-header-mobile {
+    padding: var(--spacing-md);
+    background-color: var(--color-gray-50);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: var(--touch-target);
+    position: relative;
+    touch-action: pan-y; /* 縦スクロールのみ許可 */
+  }
+
+  .list-header-mobile.dragging {
+    background-color: var(--color-primary);
+    color: white;
+  }
+
+  .list-title-mobile {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    margin-right: var(--spacing-sm);
+  }
+
+  .list-header-mobile.dragging .list-title-mobile {
+    color: white;
+  }
+
+  .list-card-count-mobile {
+    background-color: var(--color-gray-300);
+    color: var(--text-secondary);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    min-width: 24px;
+    text-align: center;
+  }
+
+  .list-header-mobile.dragging .list-card-count-mobile {
+    background-color: rgba(255, 255, 255, 0.3);
+    color: white;
+  }
+
+  .list-drag-handle-mobile {
+    margin-left: var(--spacing-sm);
+    opacity: 0.6;
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+  }
+
+  .list-header-mobile.dragging .list-drag-handle-mobile {
+    color: white;
+  }
+
+  /* カードコンテナ */
+  .cards-container-mobile {
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    max-height: 70vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cards-container-mobile.drag-over {
+    background-color: rgba(0, 123, 255, 0.1);
+  }
+
+  /* カード */
+  .card-view-mobile {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--card-padding);
+    transition: var(--transition-normal);
+    position: relative;
+    touch-action: pan-y;
+    display: flex;
+    align-items: center;
+    min-height: var(--touch-target);
+  }
+
+  .card-view-mobile.dragging {
+    transform: rotate(3deg) scale(1.08);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+  }
+
+  .card-view-mobile.drag-over {
+    background-color: rgba(0, 123, 255, 0.1);
+    border-color: var(--color-primary);
+    transform: scale(1.02);
+  }
+
+  .card-content-mobile {
+    flex: 1;
+  }
+
+  .card-title-mobile {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .card-view-mobile.dragging .card-title-mobile {
+    color: white;
+  }
+
+  .card-description-mobile {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  .card-view-mobile.dragging .card-description-mobile {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .card-drag-handle-mobile {
+    margin-left: var(--spacing-sm);
+    opacity: 0.6;
+    font-size: 1rem;
+    color: var(--text-secondary);
+  }
+
+  .card-view-mobile.dragging .card-drag-handle-mobile {
+    color: white;
+  }
+
+  /* リスト追加フォーム */
+  .add-list-container-mobile {
+    margin-top: var(--spacing-lg);
+  }
+
+  .add-list-form-mobile {
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .add-list-trigger-mobile {
+    width: 100%;
+    background-color: var(--bg-hover);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+    min-height: var(--touch-target);
+    font-size: 1rem;
+  }
+
+  .add-list-trigger-mobile:active {
+    background-color: var(--color-gray-200);
+    border-color: var(--color-gray-300);
+    color: var(--text-primary);
+    transform: scale(0.98);
+  }
+
+  .add-list-icon-mobile {
+    font-size: 1.25rem;
+  }
+
+  .add-list-form-container-mobile {
+    padding: var(--spacing-md);
+  }
+
+  .add-list-input-mobile {
+    margin-bottom: var(--spacing-md);
+    font-size: 1rem;
+    min-height: var(--touch-target);
+  }
+
+  .add-list-actions-mobile {
+    display: flex;
+    gap: var(--spacing-sm);
+  }
+
+  .add-list-save-btn-mobile,
+  .add-list-cancel-btn-mobile {
+    flex: 1;
+    min-height: var(--touch-target);
+    font-size: 1rem;
+  }
+
+  /* カード追加フォーム */
+  .add-card-form-mobile {
+    margin-top: var(--spacing-sm);
+  }
+
+  .add-card-trigger-mobile {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    min-height: var(--touch-target);
+  }
+
+  .add-card-trigger-mobile:active {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+    transform: scale(0.98);
+  }
+
+  .add-card-icon-mobile {
+    font-size: 1rem;
+  }
+
+  .add-card-form-container-mobile {
+    background-color: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+    padding: var(--spacing-md);
+  }
+
+  .add-card-input-mobile {
+    margin-bottom: var(--spacing-md);
+    min-height: 80px;
+    resize: vertical;
+  }
+
+  .add-card-actions-mobile {
+    display: flex;
+    gap: var(--spacing-sm);
+  }
+
+  .add-card-save-btn-mobile,
+  .add-card-cancel-btn-mobile {
+    flex: 1;
+    min-height: var(--touch-target);
+  }
+
+  /* 編集フォーム */
+  .list-header-mobile.editing {
+    background-color: var(--bg-primary);
+    padding: var(--spacing-sm);
+  }
+
+  .list-edit-form-mobile {
+    width: 100%;
+  }
+
+  .list-edit-input-mobile {
+    margin-bottom: var(--spacing-md);
+    font-size: 1rem;
+    font-weight: 600;
+    min-height: var(--touch-target);
+  }
+
+  .list-edit-actions-mobile {
+    display: flex;
+    gap: var(--spacing-sm);
+  }
+
+  .list-save-btn-mobile,
+  .list-cancel-btn-mobile,
+  .list-delete-btn-mobile {
+    background: none;
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .list-save-btn-mobile {
+    background-color: var(--color-success);
+    color: white;
+    border-color: var(--color-success);
+  }
+
+  .list-cancel-btn-mobile {
+    background-color: var(--color-secondary);
+    color: white;
+    border-color: var(--color-secondary);
+  }
+
+  .list-delete-btn-mobile {
+    background-color: var(--color-danger);
+    color: white;
+    border-color: var(--color-danger);
+  }
+
+  .card-view-mobile.editing {
+    padding: var(--spacing-sm);
+    background-color: var(--bg-primary);
+  }
+
+  .card-edit-form-mobile {
+    width: 100%;
+  }
+
+  .card-edit-input-mobile {
+    margin-bottom: var(--spacing-md);
+    min-height: 80px;
+    resize: vertical;
+  }
+
+  .card-edit-actions-mobile {
+    display: flex;
+    gap: var(--spacing-sm);
+  }
+
+  .card-save-btn-mobile,
+  .card-cancel-btn-mobile,
+  .card-delete-btn-mobile {
+    flex: 1;
+    min-height: var(--touch-target);
+  }
+
+  .card-save-btn-mobile {
+    background-color: var(--color-success);
+    color: white;
+  }
+
+  .card-cancel-btn-mobile {
+    background-color: var(--color-secondary);
+    color: white;
+  }
+
+  .card-delete-btn-mobile {
+    background-color: var(--color-danger);
+    color: white;
+  }
+
+  /* ドラッグ&ドロップ視覚効果 */
+  .drag-indicator-mobile {
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+
+  /* タッチフィードバック */
+  .card-view-mobile:active:not(.dragging),
+  .list-header-mobile:active:not(.dragging) {
+    transform: scale(0.98);
+    transition: transform 100ms ease-out;
+  }
+
+  /* スクロールバー（Webkit） */
+  .cards-container-mobile::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .cards-container-mobile::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .cards-container-mobile::-webkit-scrollbar-thumb {
+    background: var(--color-gray-300);
+    border-radius: 2px;
+  }
+
+  /* セーフエリア対応 */
+  @supports(padding: max(0px)) {
+    .board-view-mobile {
+      padding-left: max(var(--board-padding), env(safe-area-inset-left));
+      padding-right: max(var(--board-padding), env(safe-area-inset-right));
+      padding-bottom: max(var(--board-padding), env(safe-area-inset-bottom));
+    }
+
+    .board-header-mobile {
+      padding-top: max(var(--spacing-md), env(safe-area-inset-top));
+    }
+  }
+
+  /* ダークモード対応の準備 */
+  @media (prefers-color-scheme: dark) {
+    /* 将来的にダークモード対応する際はここに追加 */
+  }
+
+  /* アクセシビリティ：モーション削減 */
+  @media (prefers-reduced-motion: reduce) {
+    .card-view-mobile,
+    .list-view-mobile,
+    .list-wrapper-mobile {
+      transition: none;
+    }
+    
+    .card-view-mobile.dragging,
+    .list-view-mobile.dragging {
+      transform: none;
+    }
+  }
+
+  /* フォーカス表示の改善 */
+  .add-list-trigger-mobile:focus,
+  .add-card-trigger-mobile:focus,
+  .card-view-mobile:focus,
+  .list-header-mobile:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}

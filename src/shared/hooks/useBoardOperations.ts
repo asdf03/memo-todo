@@ -22,8 +22,8 @@ export const useBoardOperations = () => {
     optimisticUpdate(
       () => onUpdateBoard({ ...board, lists: [...board.lists, tempList] }),
       async () => {
-        const newList = await BoardAPI.addList(board.id, title, board.lists.length)
-        onUpdateBoard({ ...board, lists: [...board.lists, newList] })
+        await BoardAPI.addList(board.id, title, board.lists.length)
+        onRefresh()
       },
       () => onRefresh()
     )
