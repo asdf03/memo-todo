@@ -96,7 +96,7 @@ const CardContainer: React.FC<CardContainerProps> = ({ list, onCardDrop }) => {
       {list.cards.map((card: Card, index: number) => (
         <div
           key={card.id}
-          className={`card-wrapper-desktop ${dragOverIndex === index ? 'drag-over' : ''}`}
+          className={`card-drop-zone-desktop ${dragOverIndex === index ? 'active' : ''}`}
           onDragOver={(e) => handleCardDragOver(e, index)}
           onDrop={(e) => handleCardDrop(e, index)}
         >
