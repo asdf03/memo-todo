@@ -1,6 +1,8 @@
-import React, { useState, memo, useCallback } from 'react'
+import React, { useState, memo, useCallback, useRef, useEffect } from 'react'
 import { List } from '../../types'
 import { useBoardOperations } from '../../hooks/useBoardOperations'
+import { useTouchDrag } from '../../hooks/useTouchDrag'
+import { useTouchDropZone } from '../../hooks/useTouchDropZone'
 
 interface ListHeaderMobileProps {
   list: List
@@ -11,160 +13,187 @@ interface ListHeaderMobileProps {
 const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDragStart, onListDragEnd }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [titleInput, setTitleInput] = useState(list.title)
-  const [isDragging, setIsDragging] = useState(false)
-  const [longPressStarted, setLongPressStarted] = useState(false)
-  const { deleteList } = useBoardOperations()
+  const { deleteList, updateList } = useBoardOperations()
   const [isLoading] = useState(false)
-  const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number } | null>(null)
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null)
+  const headerRef = useRef<HTMLDivElement>(null)
+  const [currentDropZone, setCurrentDropZone] = useState<string | null>(null)
+  const [dragPreview, setDragPreview] = useState<HTMLElement | null>(null)
 
-  const startDragging = useCallback(() => {
-    setIsDragging(true)
-    setLongPressStarted(true)
-    document.body.classList.add('mobile-dragging')
-    if (navigator.vibrate) {
-      navigator.vibrate(50)
-    }
-    const fakeEvent = {
-      dataTransfer: {
-        setData: () => {},
-        getData: (type: string) => {
-          if (type === 'text/list') return list.id
-          if (type === 'application/json') return JSON.stringify(list)
-          return ''
-        }
-      }
-    } as unknown as React.DragEvent
-    onListDragStart?.(fakeEvent, list)
-  }, [list, onListDragStart])
-
-  const endDragging = useCallback(() => {
-    setIsDragging(false)
-    setLongPressStarted(false)
-    document.body.classList.remove('mobile-dragging')
-    const allListWrappers = document.querySelectorAll('.list-wrapper-mobile')
-    allListWrappers.forEach(wrapper => {
-      wrapper.classList.remove('drag-over')
-    })
-    onListDragEnd?.()
-  }, [onListDragEnd])
-
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (isEditingTitle || isDragging) {
-      return
-    }
-    e.stopPropagation()
-    const touch = e.touches[0]
-    setTouchStartPos({ x: touch.clientX, y: touch.clientY })
-    const timer = setTimeout(() => {
-      if (touchStartPos) {
-        startDragging()
-      }
-    }, 400)
-    setLongPressTimer(timer)
-  }, [isEditingTitle, isDragging, startDragging, touchStartPos])
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!touchStartPos) return;
-    e.stopPropagation()
-    const touch = e.touches[0]
-    const deltaX = Math.abs(touch.clientX - touchStartPos.x)
-    const deltaY = Math.abs(touch.clientY - touchStartPos.y)
-    if (!isDragging && !longPressStarted && (deltaX > 15 || deltaY > 15)) {
-      if (longPressTimer) {
-        clearTimeout(longPressTimer)
-        setLongPressTimer(null)
-      }
-      setTouchStartPos(null)
-      return
-    }
-    if (isDragging) {
-      e.preventDefault()
-      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
-      const allListWrappers = document.querySelectorAll('.list-wrapper-mobile')
-      allListWrappers.forEach(wrapper => {
-        wrapper.classList.remove('drag-over')
-      })
-      if (elementBelow) {
-        const targetListWrapper = elementBelow.closest('.list-wrapper-mobile')
-        if (targetListWrapper && targetListWrapper !== elementBelow.closest(`[data-list-id="${list.id}"]`)?.closest('.list-wrapper-mobile')) {
-          targetListWrapper.classList.add('drag-over')
-        }
-      }
-    }
-  }, [isDragging, longPressStarted, list.id, touchStartPos, longPressTimer])
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    e.stopPropagation()
-    if (longPressTimer) {
-      clearTimeout(longPressTimer)
-      setLongPressTimer(null)
-    }
-    setTouchStartPos(null)
-    if (isDragging) {
-      const touch = e.changedTouches[0]
-      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY)
-      if (elementBelow) {
-        const targetListWrapper = elementBelow.closest('.list-wrapper-mobile')
-        if (targetListWrapper) {
-          const allWrappers = Array.from(document.querySelectorAll('.list-wrapper-mobile'))
-          const dropIndex = allWrappers.indexOf(targetListWrapper)
-          const currentIndex = allWrappers.findIndex(wrapper => 
-            wrapper.querySelector(`[data-list-id="${list.id}"]`)
-          )
-          if (dropIndex !== -1 && currentIndex !== -1 && dropIndex !== currentIndex) {
-            const dropEvent = new CustomEvent('drop', {
-              bubbles: true,
-              cancelable: true,
-              detail: {
-                listId: list.id,
-                dropIndex: dropIndex,
-                dataTransfer: {
-                  types: ['text/list'],
-                  getData: (type: string) => {
-                    if (type === 'text/list') return list.id
-                    if (type === 'application/json') return JSON.stringify(list)
-                    return ''
-                  }
-                }
+  // Touch drop zone setup
+  const { registerDropZone, handleTouchMove: dropZoneTouchMove, handleTouchEnd: dropZoneTouchEnd } = useTouchDropZone({
+    onDragEnter: (dropZone) => {
+      setCurrentDropZone(dropZone.id)
+      dropZone.element.classList.add('drag-over')
+    },
+    onDragLeave: (dropZone) => {
+      setCurrentDropZone(null)
+      dropZone.element.classList.remove('drag-over')
+    },
+    onDrop: (dropZone) => {
+      const allWrappers = Array.from(document.querySelectorAll('.list-wrapper-mobile'))
+      const dropIndex = allWrappers.indexOf(dropZone.element)
+      const currentIndex = allWrappers.findIndex(wrapper => 
+        wrapper.querySelector(`[data-list-id="${list.id}"]`)
+      )
+      
+      if (dropIndex !== -1 && currentIndex !== -1 && dropIndex !== currentIndex) {
+        // Create synthetic drop event for existing logic
+        const dropEvent = new CustomEvent('drop', {
+          bubbles: true,
+          cancelable: true,
+          detail: {
+            listId: list.id,
+            dropIndex: dropIndex,
+            dataTransfer: {
+              types: ['text/list'],
+              getData: (type: string) => {
+                if (type === 'text/list') return list.id
+                if (type === 'application/json') return JSON.stringify(list)
+                return ''
               }
-            })
-            Object.defineProperty(dropEvent, 'dataTransfer', {
-              value: {
-                types: ['text/list'],
-                getData: (type: string) => {
-                  if (type === 'text/list') return list.id
-                  if (type === 'application/json') return JSON.stringify(list)
-                  return ''
-                }
-              },
-              writable: false
-            })
-            Object.defineProperty(dropEvent, 'preventDefault', {
-              value: () => {},
-              writable: false
-            })
-            targetListWrapper.dispatchEvent(dropEvent)
-            if (navigator.vibrate) {
-              navigator.vibrate([30, 50, 30])
             }
           }
-        }
+        })
+        
+        // Add dataTransfer property
+        Object.defineProperty(dropEvent, 'dataTransfer', {
+          value: {
+            types: ['text/list'],
+            getData: (type: string) => {
+              if (type === 'text/list') return list.id
+              if (type === 'application/json') return JSON.stringify(list)
+              return ''
+            }
+          },
+          writable: false
+        })
+        
+        Object.defineProperty(dropEvent, 'preventDefault', {
+          value: () => {},
+          writable: false
+        })
+        
+        dropZone.element.dispatchEvent(dropEvent)
       }
-      endDragging()
+      
+      // Clean up
+      setCurrentDropZone(null)
+      dropZone.element.classList.remove('drag-over')
     }
-  }, [isDragging, endDragging, list])
+  })
 
-  const handleTouchCancel = useCallback(() => {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer)
-      setLongPressTimer(null)
+  // Touch drag setup
+  const { dragState, touchHandlers, isDragging } = useTouchDrag({
+    threshold: 15,
+    onDragStart: (event, element) => {
+      if (isEditingTitle) return
+      
+      // Add mobile dragging class
+      document.body.classList.add('mobile-dragging')
+      
+      // Create drag preview
+      const preview = element.cloneNode(true) as HTMLElement
+      preview.style.position = 'fixed'
+      preview.style.top = '-1000px'
+      preview.style.left = '-1000px'
+      preview.style.pointerEvents = 'none'
+      preview.style.opacity = '0.8'
+      preview.style.zIndex = '9999'
+      preview.classList.add('drag-preview')
+      document.body.appendChild(preview)
+      setDragPreview(preview)
+      
+      // Register all list wrappers as drop zones
+      const allWrappers = document.querySelectorAll('.list-wrapper-mobile')
+      allWrappers.forEach((wrapper, index) => {
+        registerDropZone(wrapper as HTMLElement, `list-${index}`, { index })
+      })
+      
+      // Call original drag start handler
+      const fakeEvent = {
+        dataTransfer: {
+          setData: () => {},
+          getData: (type: string) => {
+            if (type === 'text/list') return list.id
+            if (type === 'application/json') return JSON.stringify(list)
+            return ''
+          }
+        }
+      } as unknown as React.DragEvent
+      
+      onListDragStart?.(fakeEvent, list)
+    },
+    onDragMove: (event, state) => {
+      if (!dragState.currentPosition) return
+      
+      // Update drag preview position
+      if (dragPreview) {
+        dragPreview.style.top = `${dragState.currentPosition.y - 30}px`
+        dragPreview.style.left = `${dragState.currentPosition.x - 50}px`
+      }
+      
+      // Handle drop zone detection
+      dropZoneTouchMove(dragState.currentPosition)
+    },
+    onDragEnd: (event, state) => {
+      if (!dragState.currentPosition) return
+      
+      // Handle drop
+      dropZoneTouchEnd(dragState.currentPosition)
+      
+      // Clean up
+      document.body.classList.remove('mobile-dragging')
+      
+      if (dragPreview) {
+        document.body.removeChild(dragPreview)
+        setDragPreview(null)
+      }
+      
+      // Remove drag over classes
+      const allWrappers = document.querySelectorAll('.list-wrapper-mobile')
+      allWrappers.forEach(wrapper => {
+        wrapper.classList.remove('drag-over')
+      })
+      
+      onListDragEnd?.()
     }
-    setTouchStartPos(null)
-    if (isDragging) {
-      endDragging()
+  })
+
+  // Register list wrappers as drop zones when component mounts
+  useEffect(() => {
+    const allWrappers = document.querySelectorAll('.list-wrapper-mobile')
+    const cleanup: (() => void)[] = []
+    
+    allWrappers.forEach((wrapper, index) => {
+      const unregister = registerDropZone(wrapper as HTMLElement, `list-${index}`, { index })
+      cleanup.push(unregister)
+    })
+    
+    return () => {
+      cleanup.forEach(fn => fn())
     }
-  }, [isDragging, endDragging, longPressTimer])
+  }, [registerDropZone])
+
+  const handleTitleSave = useCallback(async () => {
+    if (titleInput.trim() && titleInput !== list.title) {
+      try {
+        await updateList(list.id, { title: titleInput.trim() })
+      } catch (error) {
+        console.error('Failed to update list title:', error)
+        setTitleInput(list.title) // Revert on error
+      }
+    }
+    setIsEditingTitle(false)
+  }, [titleInput, list.title, list.id, updateList])
+
+  const handleTitleKeyPress = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleTitleSave()
+    } else if (e.key === 'Escape') {
+      setTitleInput(list.title)
+      setIsEditingTitle(false)
+    }
+  }, [handleTitleSave, list.title])
 
   const handleDeleteList = useCallback(async () => {
     if (confirm(`リスト「${list.title}」を削除しますか？`)) {
@@ -174,7 +203,8 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
 
   return (
     <div 
-      className={`list-header-mobile ${isDragging ? 'dragging' : ''}`}
+      ref={headerRef}
+      className={`list-header-mobile ${isDragging ? 'dragging' : ''} ${currentDropZone ? 'drag-over' : ''}`}
       data-list-id={list.id}
     >
       {isEditingTitle ? (
@@ -182,6 +212,8 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
           type="text"
           value={titleInput}
           onChange={(e) => setTitleInput(e.target.value)}
+          onBlur={handleTitleSave}
+          onKeyDown={handleTitleKeyPress}
           className="list-title-input-mobile"
           autoFocus
           disabled={isLoading}
@@ -190,11 +222,13 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
       ) : (
         <h3 
           className="list-title-mobile" 
-          onClick={() => setIsEditingTitle(true)}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onTouchCancel={handleTouchCancel}
+          onClick={() => !isDragging && setIsEditingTitle(true)}
+          {...touchHandlers}
+          style={{
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            touchAction: 'none'
+          }}
         >
           {list.title}
         </h3>
@@ -203,6 +237,7 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
         className="delete-list-btn-mobile"
         onClick={handleDeleteList}
         aria-label="リストを削除"
+        disabled={isDragging}
       >
         ×
       </button>
@@ -210,4 +245,4 @@ const ListHeaderMobile: React.FC<ListHeaderMobileProps> = memo(({ list, onListDr
   )
 })
 
-export default ListHeaderMobile 
+export default ListHeaderMobile

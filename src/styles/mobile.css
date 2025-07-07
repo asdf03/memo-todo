@@ -524,6 +524,245 @@ body.mobile-dragging * {
   user-select: none;
 }
 
+/* Drag preview styles */
+.drag-preview {
+  box-shadow: var(--shadow-2xl);
+  transform: rotate(3deg) scale(1.05);
+  border-radius: var(--border-radius-xl);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--color-primary);
+}
+
+/* Mobile drag states */
+.list-header-mobile.dragging {
+  opacity: 0.6;
+  transform: scale(1.02);
+  background: var(--color-primary-light);
+  border-radius: var(--border-radius-lg);
+}
+
+.card-view-mobile.dragging {
+  opacity: 0.6;
+  transform: scale(1.02) rotate(2deg);
+  background: var(--color-primary-light);
+  box-shadow: var(--shadow-xl);
+  z-index: 1000;
+}
+
+/* Drag over effects */
+.list-wrapper-mobile.drag-over {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-lighter) 0%,
+    var(--color-primary-light) 100%
+  );
+  border: 2px dashed var(--color-primary);
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-2);
+  animation: dragOverPulse 1s ease-in-out infinite;
+}
+
+.card-view-mobile.card-drag-over {
+  background: var(--color-primary-light);
+  border: 2px dashed var(--color-primary);
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lg);
+  animation: cardDragOverPulse 0.8s ease-in-out infinite;
+}
+
+.card-view-mobile.hover-drop-zone {
+  background: var(--color-surface-hover);
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.cards-container.card-drag-over {
+  background: var(--color-primary-light);
+  border: 2px dashed var(--color-primary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-3);
+  min-height: 80px;
+  animation: containerDragOverPulse 1s ease-in-out infinite;
+}
+
+/* Mobile-specific animations */
+@keyframes dragOverPulse {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.01);
+  }
+}
+
+@keyframes cardDragOverPulse {
+  0%, 100% {
+    background: var(--color-primary-light);
+  }
+  50% {
+    background: var(--color-primary-lighter);
+  }
+}
+
+@keyframes containerDragOverPulse {
+  0%, 100% {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+  }
+  50% {
+    background: var(--color-primary-lighter);
+    border-color: var(--color-primary-hover);
+  }
+}
+
+/* Touch feedback improvements */
+.list-title-mobile:active {
+  transform: scale(0.98);
+  background: var(--color-primary-light);
+  transition: all 0.1s ease-out;
+}
+
+.card-view-mobile:active {
+  transform: scale(0.98);
+  background: var(--color-surface-hover);
+  transition: all 0.1s ease-out;
+}
+
+/* Mobile edit forms */
+.card-edit-mobile {
+  background: var(--color-white);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-4);
+  box-shadow: var(--shadow-lg);
+  margin-bottom: var(--spacing-3);
+}
+
+.card-title-input-mobile,
+.card-description-input-mobile {
+  width: 100%;
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  background: var(--color-white);
+  transition: var(--transition-fast);
+  resize: none;
+  font-family: inherit;
+}
+
+.card-title-input-mobile:focus,
+.card-description-input-mobile:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+  outline: none;
+}
+
+.card-description-input-mobile {
+  margin-top: var(--spacing-2);
+  min-height: 80px;
+}
+
+.card-edit-actions-mobile {
+  display: flex;
+  gap: var(--spacing-2);
+  justify-content: flex-end;
+  margin-top: var(--spacing-3);
+}
+
+.save-btn-mobile,
+.cancel-btn-mobile {
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--border-radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.save-btn-mobile {
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border: none;
+}
+
+.save-btn-mobile:active {
+  background: var(--color-primary-active);
+  transform: scale(0.95);
+}
+
+.cancel-btn-mobile {
+  background: var(--color-gray-100);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-primary);
+}
+
+.cancel-btn-mobile:active {
+  background: var(--color-gray-200);
+  color: var(--color-text-primary);
+  transform: scale(0.95);
+}
+
+/* List title editing */
+.list-title-input-mobile {
+  width: 100%;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: var(--color-white);
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+/* Mobile delete buttons */
+.delete-card-btn-mobile,
+.delete-list-btn-mobile {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  transition: var(--transition-fast);
+  opacity: 0.7;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.delete-card-btn-mobile:active,
+.delete-list-btn-mobile:active {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.card-view-mobile:hover .delete-card-btn-mobile,
+.list-header-mobile:hover .delete-list-btn-mobile {
+  opacity: 1;
+}
+
 /* ========== ANIMATIONS MOBILE ========== */
 @keyframes fadeInUp {
   from {
