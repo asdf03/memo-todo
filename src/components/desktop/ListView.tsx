@@ -27,10 +27,10 @@ const ListView: React.FC<ListViewProps> = ({
 
   return (
     <div 
-      className="list-view-desktop"
+      className="bg-white rounded-lg shadow-sm border h-fit max-h-full flex flex-col"
       data-list-id={list.id}
     >
-      <div className="list-header-desktop">
+      <div className="p-4 border-b bg-gray-50 rounded-t-lg">
         <ListHeader 
           list={list}
           onListDragStart={handleListDragStart}
@@ -38,14 +38,14 @@ const ListView: React.FC<ListViewProps> = ({
         />
       </div>
       
-      <div className="cards-container-desktop">
+      <div className="flex-1 p-4 overflow-y-auto max-h-96">
         <CardContainer 
           list={list}
           onCardDrop={onCardDrop}
         />
       </div>
     
-      <div className="list-actions-desktop">
+      <div className="p-4 border-t">
         <ListActions listId={list.id} />
       </div>
     </div>

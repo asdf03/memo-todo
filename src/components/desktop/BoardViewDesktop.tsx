@@ -68,12 +68,12 @@ const BoardViewDesktop: React.FC = () => {
   if (!board) return null
 
   return (
-    <div className="board-view-desktop">
-      <div className="lists-container-desktop">
+    <div className="h-full">
+      <div className="flex gap-6 h-full overflow-x-auto pb-4">
         {board.lists.map((list: List, index: number) => (
           <div
             key={list.id}
-            className={`list-wrapper-desktop ${dragOverIndex === index ? 'drag-over' : ''}`}
+            className={`min-w-80 ${dragOverIndex === index ? 'ring-2 ring-blue-500' : ''}`}
             onDragOver={(e) => handleListDragOver(e, index)}
             onDrop={(e) => handleListDrop(e, index)}
             onDragLeave={handleListDragLeave}
@@ -86,7 +86,7 @@ const BoardViewDesktop: React.FC = () => {
             />
           </div>
         ))}
-        <div className="add-list-container-desktop">
+        <div className="min-w-80">
           <AddListForm />
         </div>
       </div>

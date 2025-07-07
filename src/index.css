@@ -1,6 +1,3 @@
-/* ベーススタイルは常に読み込み */
-@import './styles/shared/base.css';
-
-/* デスクトップとモバイル両方読み込み（メディアクエリは各ファイル内で制御） */
-@import './styles/desktop/desktop.css';
-@import './styles/mobile/mobile.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

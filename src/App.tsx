@@ -123,25 +123,25 @@ const AppContent: React.FC = () => {
 
   return (
     <BoardProvider board={board} onUpdateBoard={setBoard} onRefresh={refreshBoard}>
-      <div className="app">
-        <header className="app-header">
-          <div className="container">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="app-logo">📝</div>
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center space-x-4">
+                <div className="text-2xl">📝</div>
                 <BoardTitle />
               </div>
-              <div className="flex items-center gap-2">
-                <div className="user-info">
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3">
                   <img 
                     src={user.user_metadata?.avatar_url} 
                     alt={user.user_metadata?.full_name || 'ユーザー'}
-                    className="user-avatar"
+                    className="w-8 h-8 rounded-full"
                   />
-                  <span className="user-name">{user.user_metadata?.full_name}</span>
+                  <span className="text-sm font-medium">{user.user_metadata?.full_name}</span>
                 </div>
                 <button 
-                  className="btn btn--ghost btn--icon focus-ring" 
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg" 
                   onClick={refreshBoard}
                   aria-label="ボードを更新"
                   title="ボードを更新"
@@ -149,21 +149,21 @@ const AppContent: React.FC = () => {
                   🔄
                 </button>
                 <button 
-                  className="btn btn--ghost btn--icon focus-ring"
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
                   aria-label="設定を開く"
                   title="設定"
                 >
                   ⚙️
                 </button>
                 <button 
-                  className="btn btn--ghost btn--icon focus-ring"
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
                   aria-label="ヘルプを表示"
                   title="ヘルプ"
                 >
                   ❓
                 </button>
                 <button 
-                  className="btn btn--ghost btn--icon focus-ring" 
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg" 
                   onClick={handleSignOut}
                   aria-label="ログアウト"
                   title="ログアウト"
@@ -174,11 +174,9 @@ const AppContent: React.FC = () => {
             </div>
           </div>
         </header>
-        <main className="app-main">
-          <div className="container">
-            <div className="board-container">
-              <BoardView />
-            </div>
+        <main className="flex-1">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <BoardView />
           </div>
         </main>
       </div>
