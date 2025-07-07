@@ -9,33 +9,24 @@ export const useDynamicCSS = () => {
     const existingLinks = document.querySelectorAll('link[data-dynamic-css]')
     existingLinks.forEach(link => link.remove())
 
-    // Always load base styles
-    const baseLink = document.createElement('link')
-    baseLink.rel = 'stylesheet'
-    baseLink.href = '/src/styles/base.css'
-    baseLink.setAttribute('data-dynamic-css', 'base')
-    document.head.appendChild(baseLink)
-
-    // Load device-specific styles
-    const deviceLink = document.createElement('link')
-    deviceLink.rel = 'stylesheet'
-    deviceLink.setAttribute('data-dynamic-css', 'device')
-    
-    if (isMobile || isTablet) {
-      deviceLink.href = '/src/styles/mobile.css'
-      console.log('[useDynamicCSS] Loading mobile CSS')
-    } else if (isDesktop) {
-      deviceLink.href = '/src/styles/desktop.css'
-      console.log('[useDynamicCSS] Loading desktop CSS')
+    // Import device-specific CSS modules dynamically
+    const loadDeviceCSS = async () => {
+      try {
+        if (isMobile || isTablet) {
+          console.log('[useDynamicCSS] Loading mobile CSS')
+          await import('../styles/mobile.css')
+        } else if (isDesktop) {
+          console.log('[useDynamicCSS] Loading desktop CSS')
+          await import('../styles/desktop.css')
+        }
+      } catch (error) {
+        console.error('[useDynamicCSS] Failed to load device-specific CSS:', error)
+      }
     }
-    
-    document.head.appendChild(deviceLink)
 
-    // Cleanup function
-    return () => {
-      const dynamicLinks = document.querySelectorAll('link[data-dynamic-css]')
-      dynamicLinks.forEach(link => link.remove())
-    }
+    loadDeviceCSS()
+
+    // No cleanup needed for CSS modules as Vite handles it
   }, [isMobile, isTablet, isDesktop])
 
   return { isMobile, isTablet, isDesktop }
